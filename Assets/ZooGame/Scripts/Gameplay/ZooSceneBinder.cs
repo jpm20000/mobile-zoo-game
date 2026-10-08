@@ -43,6 +43,9 @@ namespace ZooGame.Gameplay
         [SerializeField] AnimalInfoPanel animalInfoPanel;
         [SerializeField] AnimalDebugSpawnPanel animalDebugPanel;
         [SerializeField] AnimalDefinition[] animalDefinitions;
+        [Header("Animal needs (M5)")]
+        [Tooltip("Global needs tuning. Optional: built-in defaults are used when empty.")]
+        [SerializeField] AnimalNeedsConfig animalNeedsConfig;
         [Tooltip("Editor convenience: if this scene is entered directly, load the Bootstrap scene first.")]
         [SerializeField] string bootstrapSceneName = "Bootstrap";
 
@@ -68,6 +71,12 @@ namespace ZooGame.Gameplay
 
         /// <summary>Player placement of new animals into enclosures (driven by the build-mode controller).</summary>
         public AnimalPlacementTool AnimalPlacement { get; private set; }
+
+        /// <summary>Cached per-enclosure habitat summaries (area, terrain, resources, residents).</summary>
+        public IEnclosureHabitatService AnimalHabitats { get; private set; }
+
+        /// <summary>The welfare simulation, driven by the GameClock.</summary>
+        public AnimalNeedsSystem AnimalNeeds { get; private set; }
 
         void Awake()
         {
@@ -123,7 +132,15 @@ namespace ZooGame.Gameplay
             {
                 Animals = new AnimalRegistry();
                 AnimalEnclosures = new AnimalEnclosureService(Grid, Construction.Enclosures);
-                animalSpawner.Bind(Animals, new AnimalDefinitionResolver(animalDefinitions), AnimalEnclosures, game.Clock);
+                var resolver = new AnimalDefinitionResolver(animalDefinitions);
+                animalSpawner.Bind(Animals, resolver, AnimalEnclosures, game.Clock);
+
+                AnimalHabitats = new EnclosureHabitatService(Grid, Construction.Enclosures, Placement, Animals);
+                AnimalNeeds = new AnimalNeedsSystem(Animals, resolver, AnimalEnclosures, AnimalHabitats,
+                    animalNeedsConfig != null ? animalNeedsConfig : AnimalNeedsConfig.CreateDefault());
+                var driver = animalSpawner.GetComponent<AnimalNeedsDriver>();
+                if (driver == null) driver = animalSpawner.gameObject.AddComponent<AnimalNeedsDriver>();
+                driver.Bind(AnimalNeeds, game.Clock);
 
                 if (animalSelection != null)
                 {
@@ -131,7 +148,7 @@ namespace ZooGame.Gameplay
                         DpToPixels(28f));
                     // A construction or placement tool owns taps while it is active.
                     animalSelection.CanSelect = () => buildModeController == null || buildModeController.Mode == BuildMode.None;
-                    if (animalInfoPanel != null) animalInfoPanel.Bind(animalSelection);
+                    if (animalInfoPanel != null) animalInfoPanel.Bind(animalSelection, AnimalNeeds);
                 }
                 if (buildModeController != null)
                 {

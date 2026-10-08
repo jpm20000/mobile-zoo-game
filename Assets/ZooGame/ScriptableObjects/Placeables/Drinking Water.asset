@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fdffcaa52aa2434ebe4e2fe2662e54c, type: 3}
+  m_Name: Drinking Water
+  m_EditorClassIdentifier: ZooGame.Data::ZooGame.Data.PlaceableDefinition
+  id: drinking-water-source
+  displayName: Drinking Water
+  category: 2
+  prefab: {fileID: 3652158801020738804, guid: 7dbf5179706a4a5479a0168db48ceff7, type: 3}
+  footprintWidth: 1
+  footprintHeight: 1
+  allowRotation: 1
+  icon: {fileID: 0}
+  cost: 0
+  habitatResource:
+    kind: 2
+    amount: 1

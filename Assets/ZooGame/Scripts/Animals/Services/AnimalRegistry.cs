@@ -12,11 +12,15 @@ namespace ZooGame.Animals
 
         public int Count => _byId.Count;
 
+        public event System.Action<string> MembershipChanged;
+        public event System.Action<string> Unregistered;
+
         public bool Register(AnimalInstance animal)
         {
             if (animal == null || string.IsNullOrEmpty(animal.AnimalId) || _byId.ContainsKey(animal.AnimalId)) return false;
             _byId.Add(animal.AnimalId, animal);
             Index(animal);
+            MembershipChanged?.Invoke(animal.EnclosureId);
             return true;
         }
 
@@ -25,6 +29,8 @@ namespace ZooGame.Animals
             if (animalId == null || !_byId.TryGetValue(animalId, out var animal)) return false;
             _byId.Remove(animalId);
             Unindex(animal);
+            MembershipChanged?.Invoke(animal.EnclosureId);
+            Unregistered?.Invoke(animalId);
             return true;
         }
 
@@ -42,9 +48,12 @@ namespace ZooGame.Animals
         public bool SetEnclosure(string animalId, string enclosureId)
         {
             if (animalId == null || !_byId.TryGetValue(animalId, out var animal)) return false;
+            string before = animal.EnclosureId;
             Unindex(animal);
             animal.SetEnclosure(enclosureId);
             Index(animal);
+            MembershipChanged?.Invoke(before);
+            if (animal.EnclosureId != before) MembershipChanged?.Invoke(animal.EnclosureId);
             return true;
         }
 

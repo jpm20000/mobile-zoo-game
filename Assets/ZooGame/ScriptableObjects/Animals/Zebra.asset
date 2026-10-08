@@ -23,3 +23,16 @@ MonoBehaviour:
   preferredGroupMin: 3
   preferredGroupMax: 8
   baseAppeal: 2
+  hungerDecayPerMinute: 0.5
+  thirstDecayPerMinute: 0.6
+  hungerRecoveryPerMinute: 6
+  thirstRecoveryPerMinute: 8
+  requiresHabitatWater: 0
+  requiresShelter: 0
+  shelterPerAnimal: 1
+  requiredEnrichmentValue: 3
+  terrainPreferences:
+  - terrain: 0
+    minShare: 0.6
+    maxShare: 1
+  terrainTolerance: 0.5

@@ -31,6 +31,8 @@ namespace ZooGame.Data
         [SerializeField] Sprite icon;
         [Tooltip("Reserved for the economy milestone; nothing deducts it yet.")]
         [SerializeField, Min(0)] int cost;
+        [Tooltip("Optional: what this object provides to the enclosure it stands in (food, water, shelter, enrichment).")]
+        [SerializeField] HabitatResourceInfo habitatResource;
 
         public string Id => id;
         public string DisplayName => displayName;
@@ -41,6 +43,11 @@ namespace ZooGame.Data
         public bool AllowRotation => allowRotation;
         public Sprite Icon => icon;
         public int Cost => cost;
+        public HabitatResourceInfo HabitatResource => habitatResource;
+
+        /// <summary>Sets the habitat role from code (tests, procedural content).</summary>
+        public void ConfigureHabitatResource(HabitatResourceKind kind, float amount = 1f) =>
+            habitatResource = new HabitatResourceInfo(kind, amount);
 
         void OnValidate()
         {

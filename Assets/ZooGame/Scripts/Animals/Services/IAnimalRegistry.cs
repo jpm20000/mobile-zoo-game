@@ -7,6 +7,12 @@ namespace ZooGame.Animals
     {
         int Count { get; }
 
+        /// <summary>Raised when an animal is registered, unregistered or moved, with the id of each enclosure whose residents changed (null = the no-enclosure group).</summary>
+        event System.Action<string> MembershipChanged;
+
+        /// <summary>Raised after an animal has been removed, so per-animal caches can drop it.</summary>
+        event System.Action<string> Unregistered;
+
         /// <summary>False for null, a missing id, or an id already registered.</summary>
         bool Register(AnimalInstance animal);
 

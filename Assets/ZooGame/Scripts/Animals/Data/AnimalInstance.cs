@@ -18,6 +18,19 @@ namespace ZooGame.Animals
         [SerializeField] AnimalSex sex;
         [SerializeField] string enclosureId;
         [SerializeField] Vector3 position;
+        // Needs (M5), 0-100. Per-individual, so they live here; the species-level tuning lives in AnimalDefinition.
+        [SerializeField] float hunger = FullNeed;
+        [SerializeField] float thirst = FullNeed;
+        [SerializeField] float comfort = StartingNeed;
+        [SerializeField] float social = StartingNeed;
+        [SerializeField] float enrichment = StartingNeed;
+        [SerializeField] float overallWelfare = StartingNeed;
+
+        public const float MinNeed = 0f;
+        public const float MaxNeed = 100f;
+        /// <summary>Hunger and thirst start full; comfort, social, enrichment and welfare start neutral until first evaluated.</summary>
+        public const float FullNeed = 100f;
+        public const float StartingNeed = 50f;
 
         /// <summary>Use for animals that already have an id (reconstruction from saved data). New animals use <see cref="CreateNew"/>.</summary>
         public AnimalInstance(string animalId, string speciesId, string displayName, AnimalSex sex, string enclosureId, Vector3 position)
@@ -30,6 +43,8 @@ namespace ZooGame.Animals
             this.sex = sex;
             this.enclosureId = Normalize(enclosureId);
             this.position = position;
+            hunger = thirst = FullNeed;
+            comfort = social = enrichment = overallWelfare = StartingNeed;
         }
 
         /// <summary>Creates a brand-new individual with a freshly generated id.</summary>
@@ -43,6 +58,16 @@ namespace ZooGame.Animals
         public string DisplayName { get => displayName; set => displayName = value ?? string.Empty; }
         public AnimalSex Sex => sex;
         public Vector3 Position { get => position; set => position = value; }
+
+        // Every setter clamps to 0-100, so no system can push a need out of range.
+        public float Hunger { get => hunger; set => hunger = Clamp(value); }
+        public float Thirst { get => thirst; set => thirst = Clamp(value); }
+        public float Comfort { get => comfort; set => comfort = Clamp(value); }
+        public float Social { get => social; set => social = Clamp(value); }
+        public float Enrichment { get => enrichment; set => enrichment = Clamp(value); }
+        public float OverallWelfare { get => overallWelfare; set => overallWelfare = Clamp(value); }
+
+        static float Clamp(float v) => float.IsNaN(v) ? MinNeed : Mathf.Clamp(v, MinNeed, MaxNeed);
 
         /// <summary>The enclosure this animal belongs to, or null. Changed through <see cref="IAnimalRegistry.SetEnclosure"/> so the registry's index stays correct.</summary>
         public string EnclosureId => enclosureId;

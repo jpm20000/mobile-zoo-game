@@ -1,7 +1,7 @@
 {
     "name": "ZooGame.Animals",
     "rootNamespace": "ZooGame.Animals",
-    "references": ["ZooGame.Core","ZooGame.World","ZooGame.Input","ZooGame.Construction","Unity.ugui"],
+    "references": ["ZooGame.Core","ZooGame.World","ZooGame.Input","ZooGame.Construction","ZooGame.Data","ZooGame.Placement","Unity.ugui"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
