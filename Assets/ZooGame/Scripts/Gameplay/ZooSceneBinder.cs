@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using ZooGame.Animals;
 using ZooGame.Cameras;
 using ZooGame.Construction;
 using ZooGame.Data;
@@ -36,6 +37,12 @@ namespace ZooGame.Gameplay
         [SerializeField] FenceRenderer fenceRenderer;
         [SerializeField] ConstructionPreview constructionPreview;
         [SerializeField] ConstructionTestPanel constructionPanel;
+        [Header("Animals (M4)")]
+        [SerializeField] AnimalSpawner animalSpawner;
+        [SerializeField] AnimalSelectionController animalSelection;
+        [SerializeField] AnimalInfoPanel animalInfoPanel;
+        [SerializeField] AnimalDebugSpawnPanel animalDebugPanel;
+        [SerializeField] AnimalDefinition[] animalDefinitions;
         [Tooltip("Editor convenience: if this scene is entered directly, load the Bootstrap scene first.")]
         [SerializeField] string bootstrapSceneName = "Bootstrap";
 
@@ -51,6 +58,16 @@ namespace ZooGame.Gameplay
         public ConstructionModel Construction { get; private set; }
 
         public BuildModeController Builder => buildModeController;
+
+        /// <summary>The authoritative animal records; null if animals are not set up in the scene.</summary>
+        public IAnimalRegistry Animals { get; private set; }
+
+        public AnimalSpawner AnimalSpawner => animalSpawner;
+        public AnimalSelectionController AnimalSelection => animalSelection;
+        public IAnimalEnclosureService AnimalEnclosures { get; private set; }
+
+        /// <summary>Player placement of new animals into enclosures (driven by the build-mode controller).</summary>
+        public AnimalPlacementTool AnimalPlacement { get; private set; }
 
         void Awake()
         {
@@ -100,6 +117,28 @@ namespace ZooGame.Gameplay
                 };
                 buildModeController.Bind(pointerInput, context, placementController, constructionCatalog);
                 if (constructionPanel != null) constructionPanel.Bind(buildModeController, Construction);
+            }
+
+            if (animalSpawner != null && Construction != null)
+            {
+                Animals = new AnimalRegistry();
+                AnimalEnclosures = new AnimalEnclosureService(Grid, Construction.Enclosures);
+                animalSpawner.Bind(Animals, new AnimalDefinitionResolver(animalDefinitions), AnimalEnclosures, game.Clock);
+
+                if (animalSelection != null)
+                {
+                    animalSelection.Bind(pointerInput, cameraController.GetComponent<Camera>(), animalSpawner,
+                        DpToPixels(28f));
+                    // A construction or placement tool owns taps while it is active.
+                    animalSelection.CanSelect = () => buildModeController == null || buildModeController.Mode == BuildMode.None;
+                    if (animalInfoPanel != null) animalInfoPanel.Bind(animalSelection);
+                }
+                if (buildModeController != null)
+                {
+                    AnimalPlacement = new AnimalPlacementTool(cameraController.GetComponent<Camera>(), Grid, animalSpawner);
+                    buildModeController.RegisterTool(AnimalPlacement);
+                    if (animalDebugPanel != null) animalDebugPanel.Bind(AnimalPlacement, buildModeController, animalDefinitions);
+                }
             }
 
             debugHud.Bind(game, game.Config.ShowDebugHud, gridOverlay.Toggle);

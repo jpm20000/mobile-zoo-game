@@ -29,6 +29,7 @@ namespace ZooGame.Construction
         PathTool _path;
         FenceTool _fence;
         DemolishTool _demolish;
+        readonly System.Collections.Generic.List<IBuildTool> _extraTools = new System.Collections.Generic.List<IBuildTool>(2);
         IBuildTool _active;
         BuildMode _mode;
         bool _panMode;
@@ -128,8 +129,25 @@ namespace ZooGame.Construction
         public bool Confirm()
         {
             bool ok = _active.Confirm();
-            Changed?.Invoke();
+            if (!LeaveIfFinished()) Changed?.Invoke();
             return ok;
+        }
+
+        /// <summary>Registers an extra tool (for example animal placement) so it can be entered by its <see cref="BuildMode"/>.</summary>
+        public void RegisterTool(IBuildTool tool)
+        {
+            if (tool != null && !_extraTools.Contains(tool)) _extraTools.Add(tool);
+        }
+
+        /// <summary>Enters a registered mode. The tool is prepared by its owner first (for example by choosing what to place).</summary>
+        public void Enter(BuildMode mode) => SwitchTo(mode);
+
+        // A registered tool is a one-shot like object placement: once nothing is pending (placed or cancelled), the mode ends.
+        bool LeaveIfFinished()
+        {
+            if (_mode != BuildMode.AnimalPlacement || _active.HasPending) return false;
+            SwitchTo(BuildMode.None);
+            return true;
         }
 
         /// <summary>Discards the pending preview; with nothing pending, leaves a construction mode.</summary>
@@ -137,7 +155,7 @@ namespace ZooGame.Construction
         {
             if (_active.HasPending) _active.Cancel();
             else if (IsConstructionMode(_mode)) { SwitchTo(BuildMode.None); return; }
-            Changed?.Invoke();
+            if (!LeaveIfFinished()) Changed?.Invoke();
         }
 
         static bool IsConstructionMode(BuildMode m) =>
@@ -170,7 +188,10 @@ namespace ZooGame.Construction
                 case BuildMode.PathPlacement: return _path;
                 case BuildMode.FencePlacement: return _fence;
                 case BuildMode.Demolition: return _demolish;
-                default: return _placement;
+                default:
+                    for (int i = 0; i < _extraTools.Count; i++)
+                        if (_extraTools[i].Mode == mode) return _extraTools[i];
+                    return _placement;
             }
         }
 
@@ -197,7 +218,7 @@ namespace ZooGame.Construction
         bool IPointerClaimant.WantsPointer(in PointerSample s)
         {
             if (!IsBound) return false;
-            if (_panMode && !ReferenceEquals(_active, _placement)) return false;
+            if (_panMode && _active is StrokeToolBase) return false;
 
             // Two fingers always move/zoom the camera: a second finger turns a stroke in progress into a camera gesture.
             if (_active is StrokeToolBase stroke)

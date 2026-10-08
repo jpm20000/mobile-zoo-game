@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70265be2e6302fd4daf83b1102a3f9bf, type: 3}
+  m_Name: Zebra
+  m_EditorClassIdentifier: ZooGame.Animals::ZooGame.Animals.AnimalDefinition
+  speciesId: zebra
+  displayName: Zebra
+  description: A striped herd animal that needs room to run.
+  prefab: {fileID: 3645788828216755951, guid: 9b668c850ad595b49a94a52d327d0568, type: 3}
+  icon: {fileID: 0}
+  biome: 1
+  baseMoveSpeed: 2.2
+  minimumEnclosureArea: 16
+  preferredGroupMin: 3
+  preferredGroupMax: 8
+  baseAppeal: 2

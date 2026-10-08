@@ -10,7 +10,8 @@ namespace ZooGame.Input
         Camera,
         World,
         Placement,
-        Construction
+        Construction,
+        AnimalPlacement
     }
 
     /// <summary>

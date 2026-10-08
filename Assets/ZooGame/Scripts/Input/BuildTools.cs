@@ -7,7 +7,8 @@ namespace ZooGame.Input
         ObjectPlacement,
         PathPlacement,
         FencePlacement,
-        Demolition
+        Demolition,
+        AnimalPlacement
     }
 
     /// <summary>

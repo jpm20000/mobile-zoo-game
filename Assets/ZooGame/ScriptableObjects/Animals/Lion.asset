@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70265be2e6302fd4daf83b1102a3f9bf, type: 3}
+  m_Name: Lion
+  m_EditorClassIdentifier: ZooGame.Animals::ZooGame.Animals.AnimalDefinition
+  speciesId: lion
+  displayName: Lion
+  description: An apex predator that wants a large territory.
+  prefab: {fileID: 7556763984065832662, guid: ba6c6a0eff18e6e4c899b6ff7481b22d, type: 3}
+  icon: {fileID: 0}
+  biome: 1
+  baseMoveSpeed: 1.6
+  minimumEnclosureArea: 36
+  preferredGroupMin: 1
+  preferredGroupMax: 4
+  baseAppeal: 4
