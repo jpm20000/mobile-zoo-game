@@ -42,7 +42,7 @@ namespace ZooGame.Editor
             Debug.Log("M0 project assets created/updated.");
         }
 
-        static void EnsureFolder(string path)
+        internal static void EnsureFolder(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;
             var parent = Path.GetDirectoryName(path).Replace('\\', '/');
@@ -230,7 +230,7 @@ namespace ZooGame.Editor
             return hud;
         }
 
-        static RectTransform NewRect(string name, Transform parent, params System.Type[] components)
+        internal static RectTransform NewRect(string name, Transform parent, params System.Type[] components)
         {
             var types = new System.Type[components.Length + 1];
             types[0] = typeof(RectTransform);
@@ -240,7 +240,7 @@ namespace ZooGame.Editor
             return (RectTransform)go.transform;
         }
 
-        static void Stretch(RectTransform rt)
+        internal static void Stretch(RectTransform rt)
         {
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
@@ -248,7 +248,7 @@ namespace ZooGame.Editor
             rt.offsetMax = Vector2.zero;
         }
 
-        static void Anchor(RectTransform rt, Vector2 anchorMin, Vector2 anchorMax, Vector2 anchoredPos, Vector2 size)
+        internal static void Anchor(RectTransform rt, Vector2 anchorMin, Vector2 anchorMax, Vector2 anchoredPos, Vector2 size)
         {
             rt.anchorMin = anchorMin;
             rt.anchorMax = anchorMax;
@@ -257,7 +257,7 @@ namespace ZooGame.Editor
             rt.sizeDelta = size;
         }
 
-        static Text NewText(string name, Transform parent, Font font, int size, TextAnchor alignment)
+        internal static Text NewText(string name, Transform parent, Font font, int size, TextAnchor alignment)
         {
             var rt = NewRect(name, parent, typeof(CanvasRenderer), typeof(Text));
             var text = rt.GetComponent<Text>();
@@ -273,7 +273,7 @@ namespace ZooGame.Editor
             return text;
         }
 
-        static Button NewButton(string name, Transform parent, Font font, string label, out Text labelText)
+        internal static Button NewButton(string name, Transform parent, Font font, string label, out Text labelText)
         {
             var rt = NewRect(name, parent, typeof(CanvasRenderer), typeof(Image), typeof(Button));
             var image = rt.GetComponent<Image>();

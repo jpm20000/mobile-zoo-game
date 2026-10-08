@@ -22,15 +22,18 @@ namespace ZooGame.UI
         [SerializeField] Button speed1xButton;
         [SerializeField] Button speed2xButton;
         [SerializeField] Button speed3xButton;
+        [Tooltip("Optional: toggles the debug grid overlay.")]
+        [SerializeField] Button gridButton;
 
         readonly StringBuilder _sb = new StringBuilder(96);
         IGameContext _context;
+        System.Action _toggleGrid;
         float _fpsTimer;
         int _fpsFrames;
         float _fps;
 
         /// <summary>Called by the scene binder once the game context exists.</summary>
-        public void Bind(IGameContext context, bool visible)
+        public void Bind(IGameContext context, bool visible, System.Action toggleGrid = null)
         {
             Unbind();
 
@@ -42,6 +45,7 @@ namespace ZooGame.UI
             if (!visible) return;
 
             _context = context;
+            _toggleGrid = toggleGrid;
             _context.Events.Subscribe<GameStateChanged>(OnStateChanged);
             _context.Events.Subscribe<SimulationSpeedChanged>(OnSpeedChanged);
 
@@ -50,6 +54,7 @@ namespace ZooGame.UI
             speed1xButton.onClick.AddListener(OnSpeed1xClicked);
             speed2xButton.onClick.AddListener(OnSpeed2xClicked);
             speed3xButton.onClick.AddListener(OnSpeed3xClicked);
+            if (gridButton != null) gridButton.onClick.AddListener(OnGridClicked);
             Refresh();
         }
 
@@ -63,6 +68,8 @@ namespace ZooGame.UI
             speed1xButton.onClick.RemoveListener(OnSpeed1xClicked);
             speed2xButton.onClick.RemoveListener(OnSpeed2xClicked);
             speed3xButton.onClick.RemoveListener(OnSpeed3xClicked);
+            if (gridButton != null) gridButton.onClick.RemoveListener(OnGridClicked);
+            _toggleGrid = null;
             _context = null;
         }
 
@@ -87,6 +94,8 @@ namespace ZooGame.UI
         void OnSpeed1xClicked() => _context.SetSimulationSpeed(SimulationSpeed.X1);
         void OnSpeed2xClicked() => _context.SetSimulationSpeed(SimulationSpeed.X2);
         void OnSpeed3xClicked() => _context.SetSimulationSpeed(SimulationSpeed.X3);
+
+        void OnGridClicked() => _toggleGrid?.Invoke();
 
         void Refresh()
         {

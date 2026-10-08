@@ -38,16 +38,30 @@ namespace ZooGame.Input
     }
 
     /// <summary>
-    /// The single place that samples touch (and, in Editor/desktop only, mouse) each frame and republishes raw
-    /// pointer samples. Gesture recognition (tap, drag, pan, pinch) is built on top of this in later milestones.
-    /// Consumers must claim a pointer via <see cref="Ownership"/> before acting on it.
+    /// The single place that samples touch (and, in Editor/desktop only, mouse) each frame, republishes raw
+    /// pointer samples and feeds the shared <see cref="Gestures"/> recognizer. Consumers must claim a pointer via
+    /// <see cref="Ownership"/> before acting on it. Runs after EventSystem (order -1000) so the UI module has
+    /// already processed this frame's touches when UI ownership is decided.
     /// </summary>
     [DisallowMultipleComponent]
+    [DefaultExecutionOrder(-100)]
     public sealed class PointerInputSource : MonoBehaviour
     {
         public const int MousePointerId = -1;
 
-        public PointerOwnershipTracker Ownership { get; } = new PointerOwnershipTracker();
+        public PointerOwnershipTracker Ownership { get; }
+
+        /// <summary>Shared tap/drag/pinch recognition; subscribe here instead of interpreting raw samples.</summary>
+        public PointerGestureRecognizer Gestures { get; }
+
+        /// <summary>Mouse wheel (Editor/desktop only). Args: screen position, notches (positive = scroll up). Never raised over UI.</summary>
+        public event Action<Vector2, float> Scrolled;
+
+        public PointerInputSource()
+        {
+            Ownership = new PointerOwnershipTracker();
+            Gestures = new PointerGestureRecognizer(Ownership);
+        }
 
         /// <summary>Raised during Update, once per pointer change. Subscribe/unsubscribe in OnEnable/OnDisable.</summary>
         public event Action<PointerSample> PointerChanged;
@@ -91,17 +105,28 @@ namespace ZooGame.Input
             if (mouse == null) return;
 
             var pos = mouse.position.ReadValue();
-            if (mouse.leftButton.wasPressedThisFrame)
+
+            float scroll = mouse.scroll.ReadValue().y;
+            if (scroll != 0f && (_uiBlocker == null || !_uiBlocker.IsOverUi(MousePointerId)))
+                Scrolled?.Invoke(pos, NormalizeScroll(scroll));
+
+            // Press and release can land in the same frame (a fast click); deliver both, in order.
+            bool pressed = mouse.leftButton.wasPressedThisFrame;
+            bool released = mouse.leftButton.wasReleasedThisFrame;
+            if (pressed)
                 Dispatch(new PointerSample(MousePointerId, PointerPhase.Began, pos, Vector2.zero));
-            else if (mouse.leftButton.wasReleasedThisFrame)
+            if (released)
                 Dispatch(new PointerSample(MousePointerId, PointerPhase.Ended, pos, mouse.delta.ReadValue()));
-            else if (mouse.leftButton.isPressed)
+            else if (!pressed && mouse.leftButton.isPressed)
             {
                 var delta = mouse.delta.ReadValue();
                 if (delta != Vector2.zero)
                     Dispatch(new PointerSample(MousePointerId, PointerPhase.Moved, pos, delta));
             }
         }
+
+        // Windows reports 120 units per wheel notch; other platforms report small fractions or whole notches.
+        static float NormalizeScroll(float raw) => Mathf.Abs(raw) >= 20f ? raw / 120f : raw;
 #endif
 
         void Dispatch(in PointerSample sample)
@@ -109,6 +134,7 @@ namespace ZooGame.Input
             if (sample.Phase == PointerPhase.Began && _uiBlocker != null && _uiBlocker.IsOverUi(sample.PointerId))
                 Ownership.TryClaim(sample.PointerId, InputOwner.Ui);
 
+            Gestures.Process(sample, Time.unscaledTime);
             PointerChanged?.Invoke(sample);
 
             if (sample.Phase == PointerPhase.Ended || sample.Phase == PointerPhase.Canceled)

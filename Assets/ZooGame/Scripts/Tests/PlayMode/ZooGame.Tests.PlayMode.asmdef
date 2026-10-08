@@ -1,7 +1,7 @@
 {
     "name": "ZooGame.Tests.PlayMode",
     "rootNamespace": "ZooGame.Tests.PlayMode",
-    "references": ["ZooGame.Core","ZooGame.Gameplay","UnityEngine.TestRunner","UnityEditor.TestRunner"],
+    "references": ["ZooGame.Core","ZooGame.World","ZooGame.Cameras","ZooGame.Input","ZooGame.Gameplay","Unity.InputSystem","UnityEngine.TestRunner","UnityEditor.TestRunner"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

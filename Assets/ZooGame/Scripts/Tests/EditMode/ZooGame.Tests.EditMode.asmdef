@@ -1,7 +1,7 @@
 {
     "name": "ZooGame.Tests.EditMode",
     "rootNamespace": "ZooGame.Tests.EditMode",
-    "references": ["ZooGame.Core","ZooGame.Data","ZooGame.Input","ZooGame.UI","UnityEngine.TestRunner","UnityEditor.TestRunner"],
+    "references": ["ZooGame.Core","ZooGame.Data","ZooGame.World","ZooGame.Cameras","ZooGame.Input","ZooGame.UI","UnityEngine.TestRunner","UnityEditor.TestRunner"],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

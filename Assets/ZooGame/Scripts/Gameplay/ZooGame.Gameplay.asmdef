@@ -1,7 +1,7 @@
 {
     "name": "ZooGame.Gameplay",
     "rootNamespace": "ZooGame.Gameplay",
-    "references": ["ZooGame.Core","ZooGame.Data","ZooGame.World","ZooGame.Platform","ZooGame.Input","ZooGame.UI"],
+    "references": ["ZooGame.Core","ZooGame.Data","ZooGame.World","ZooGame.Platform","ZooGame.Input","ZooGame.UI","ZooGame.Cameras"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60a837536f0ce94991a6dd2d4428581, type: 3}
+  m_Name: WorldConfig
+  m_EditorClassIdentifier: ZooGame.Data::ZooGame.Data.WorldConfig
+  gridWidth: 64
+  gridDepth: 64
+  cellSize: 1
+  origin: {x: 0, y: 0, z: 0}
+  unlockedWidth: 32
+  unlockedDepth: 32
+  grass: {r: 0.36, g: 0.62, b: 0.33, a: 1}
+  dirt: {r: 0.5, g: 0.38, b: 0.25, a: 1}
+  sand: {r: 0.82, g: 0.76, b: 0.52, a: 1}
+  water: {r: 0.25, g: 0.5, b: 0.75, a: 1}
+  rock: {r: 0.5, g: 0.5, b: 0.52, a: 1}
+  lockedTint: {r: 0.2, g: 0.22, b: 0.24, a: 1}
+  lockedBlend: 0.65
+  showGridOverlay: 1
+  overlayMajorLineEvery: 8
