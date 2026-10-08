@@ -38,6 +38,9 @@ namespace ZooGame.World
         /// <summary>Raised after any mutation that actually changed a cell. Subscribe in OnEnable, unsubscribe in OnDisable.</summary>
         public event Action Changed;
 
+        /// <summary>Raised (in addition to <see cref="Changed"/>) when a cell's path flag actually changes.</summary>
+        public event Action PathsChanged;
+
         public ZooGrid(GridSettings settings)
         {
             if (settings.Width <= 0 || settings.Depth <= 0)
@@ -173,7 +176,11 @@ namespace ZooGame.World
         public bool SetPath(GridCoord c, bool hasPath)
         {
             if (!IsInsideGrid(c)) return false;
-            if (SetFlag(Index(c), CellFlags.HasPath, hasPath, out bool changed) && changed) Changed?.Invoke();
+            if (SetFlag(Index(c), CellFlags.HasPath, hasPath, out bool changed) && changed)
+            {
+                Changed?.Invoke();
+                PathsChanged?.Invoke();
+            }
             return true;
         }
 

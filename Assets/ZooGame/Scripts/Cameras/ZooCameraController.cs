@@ -30,6 +30,7 @@ namespace ZooGame.Cameras
 
         int _dragPointer = NoPointer;
         int _pinchA = NoPointer, _pinchB = NoPointer;
+        Vector2 _lastPinchCentre;
 
         public Vector3 Focus => _focus;
         public float Zoom => _zoom;
@@ -116,6 +117,7 @@ namespace ZooGame.Cameras
             {
                 _pinchA = a;
                 _pinchB = b;
+                _lastPinchCentre = centre;
             }
             else
             {
@@ -128,8 +130,19 @@ namespace ZooGame.Cameras
         void OnPinchChanged(Vector2 centre, float ratio)
         {
             if (_pinchA == NoPointer) return;
+
+            // Two fingers moving together pan exactly like one finger dragging.
+            var delta = centre - _lastPinchCentre;
+            _lastPinchCentre = centre;
+            if (delta != Vector2.zero)
+            {
+                float upp = CameraMath.UnitsPerPixel(_targetZoom, _camera.pixelHeight);
+                _targetFocus += CameraMath.PanFocusDelta(delta, upp, _config.YawDegrees, _config.PitchDegrees, _config.PanSpeed);
+                ClampTargets();
+            }
+
             float exponent = _config.PinchZoomSpeed;
-            ZoomBy(Mathf.Pow(ratio, -exponent), centre); // fingers spreading (ratio > 1) zooms in = smaller ortho size
+            if (ratio != 1f) ZoomBy(Mathf.Pow(ratio, -exponent), centre); // fingers spreading (ratio > 1) zooms in = smaller ortho size
         }
 
         void OnPinchEnded()

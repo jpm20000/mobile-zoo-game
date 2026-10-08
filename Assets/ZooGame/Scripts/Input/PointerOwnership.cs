@@ -9,7 +9,8 @@ namespace ZooGame.Input
         Ui,
         Camera,
         World,
-        Placement
+        Placement,
+        Construction
     }
 
     /// <summary>

@@ -122,6 +122,23 @@ namespace ZooGame.Tests.EditMode
         }
 
         [Test]
+        public void PinchFingersMovingInParallel_StillReportsTheMovingCentre()
+        {
+            var centres = new List<Vector2>();
+            _g.PinchChanged += (c, r) => centres.Add(c);
+            Send(1, PointerPhase.Began, 0, 0);
+            Send(2, PointerPhase.Began, 100, 0);
+            Send(1, PointerPhase.Moved, 0, 40);
+            Send(2, PointerPhase.Moved, 100, 40);          // both moved: distance back to 100, centre moved
+            Assert.AreEqual(new Vector2(50f, 40f), centres[centres.Count - 1]);
+
+            _ratios.Clear();
+            centres.Clear();
+            Send(1, PointerPhase.Moved, 0, 40);            // no change at all: nothing raised
+            Assert.IsEmpty(centres);
+        }
+
+        [Test]
         public void AfterPinch_RemainingFingerCannotPanOrTapUntilItLifts()
         {
             Send(1, PointerPhase.Began, 0, 0);

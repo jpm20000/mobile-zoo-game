@@ -67,8 +67,28 @@ namespace ZooGame.Input
         public event Action<PointerSample> PointerChanged;
 
         IPointerUiBlocker _uiBlocker;
+        readonly System.Collections.Generic.List<IPointerClaimant> _claimants = new System.Collections.Generic.List<IPointerClaimant>(2);
 
         public void SetUiBlocker(IPointerUiBlocker blocker) => _uiBlocker = blocker;
+
+        /// <summary>Registers a system that may claim a pointer on press, before gestures are recognised. Earlier registrations win.</summary>
+        public void AddClaimant(IPointerClaimant claimant)
+        {
+            if (claimant != null && !_claimants.Contains(claimant)) _claimants.Add(claimant);
+        }
+
+        public void RemoveClaimant(IPointerClaimant claimant) => _claimants.Remove(claimant);
+
+        /// <summary>
+        /// Takes back a pointer a claimant was using and lets the gesture recogniser see it as if it had just pressed at
+        /// <paramref name="screenPosition"/>. Call during a Began claim check for a second finger so the pair becomes a
+        /// pinch for the camera.
+        /// </summary>
+        public void ReturnToGestures(int pointerId, Vector2 screenPosition)
+        {
+            Ownership.ReleaseAll(pointerId);
+            Gestures.Process(new PointerSample(pointerId, PointerPhase.Began, screenPosition, Vector2.zero), Time.unscaledTime);
+        }
 
         void OnEnable() => EnhancedTouchSupport.Enable();
 
@@ -133,6 +153,15 @@ namespace ZooGame.Input
         {
             if (sample.Phase == PointerPhase.Began && _uiBlocker != null && _uiBlocker.IsOverUi(sample.PointerId))
                 Ownership.TryClaim(sample.PointerId, InputOwner.Ui);
+
+            if (sample.Phase == PointerPhase.Began && Ownership.GetOwner(sample.PointerId) == InputOwner.None)
+            {
+                for (int i = 0; i < _claimants.Count; i++)
+                {
+                    var c = _claimants[i];
+                    if (c.WantsPointer(sample) && Ownership.TryClaim(sample.PointerId, c.Owner)) break;
+                }
+            }
 
             Gestures.Process(sample, Time.unscaledTime);
             PointerChanged?.Invoke(sample);

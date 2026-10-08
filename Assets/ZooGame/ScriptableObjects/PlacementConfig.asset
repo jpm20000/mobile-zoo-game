@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2862d3e6362358543bc5546b39cae133, type: 3}
+  m_Name: PlacementConfig
+  m_EditorClassIdentifier: ZooGame.Data::ZooGame.Data.PlacementConfig
+  ghostMaterial: {fileID: 2100000, guid: 36625408834e4444493253758a042ee8, type: 2}
+  validColor: {r: 0.2, g: 0.9, b: 0.3, a: 0.55}
+  invalidColor: {r: 0.95, g: 0.2, b: 0.2, a: 0.55}
+  selectionColor: {r: 1, g: 0.85, b: 0.2, a: 0.5}
+  grabMarginCells: 1
+  plateHeight: 0.03

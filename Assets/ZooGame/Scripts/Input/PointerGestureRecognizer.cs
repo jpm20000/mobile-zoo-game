@@ -51,6 +51,7 @@ namespace ZooGame.Input
         readonly Slot[] _slots = new Slot[2];
         bool _pinching;
         float _lastPinchDistance;
+        Vector2 _lastPinchCentre;
 
         public GestureSettings Settings { get; set; } = GestureSettings.Default;
 
@@ -64,7 +65,7 @@ namespace ZooGame.Input
         public event Action<int> DragEnded;
         /// <summary>Two fingers down. Args: first id, second id, centre.</summary>
         public event Action<int, int, Vector2> PinchStarted;
-        /// <summary>Args: centre, ratio of current finger distance to the previous one (&gt;1 = fingers spreading).</summary>
+        /// <summary>Args: centre, ratio of current finger distance to the previous one (&gt;1 = fingers spreading). Also raised, with ratio 1, when only the centre moved.</summary>
         public event Action<Vector2, float> PinchChanged;
         public event Action PinchEnded;
 
@@ -118,7 +119,8 @@ namespace ZooGame.Input
             }
             _pinching = true;
             _lastPinchDistance = Mathf.Max(Vector2.Distance(_slots[first].Pos, _slots[second].Pos), MinPinchDistance);
-            PinchStarted?.Invoke(_slots[first].Id, _slots[second].Id, (_slots[first].Pos + _slots[second].Pos) * 0.5f);
+            _lastPinchCentre = (_slots[first].Pos + _slots[second].Pos) * 0.5f;
+            PinchStarted?.Invoke(_slots[first].Id, _slots[second].Id, _lastPinchCentre);
         }
 
         void OnMoved(in PointerSample s)
@@ -134,7 +136,10 @@ namespace ZooGame.Input
                 float dist = Mathf.Max(Vector2.Distance(a, b), MinPinchDistance);
                 float ratio = dist / _lastPinchDistance;
                 _lastPinchDistance = dist;
-                if (ratio != 1f) PinchChanged?.Invoke((a + b) * 0.5f, ratio);
+                var centre = (a + b) * 0.5f;
+                // Two fingers moving together keep the same distance but still move the centre (a two-finger pan).
+                if (ratio != 1f || centre != _lastPinchCentre) PinchChanged?.Invoke(centre, ratio);
+                _lastPinchCentre = centre;
                 return;
             }
 

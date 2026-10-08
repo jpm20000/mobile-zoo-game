@@ -1,0 +1,14 @@
+{
+    "name": "ZooGame.Construction",
+    "rootNamespace": "ZooGame.Construction",
+    "references": ["ZooGame.Core","ZooGame.Data","ZooGame.World","ZooGame.Input","ZooGame.Placement","Unity.InputSystem"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

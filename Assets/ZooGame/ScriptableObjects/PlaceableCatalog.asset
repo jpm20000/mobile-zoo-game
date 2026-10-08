@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bc569f5455f36243b4f8ffc687369d0, type: 3}
+  m_Name: PlaceableCatalog
+  m_EditorClassIdentifier: ZooGame.Data::ZooGame.Data.PlaceableCatalog
+  definitions:
+  - {fileID: 11400000, guid: 5a58fe68ca96f094cbb0f0d8d8db706b, type: 2}
+  - {fileID: 11400000, guid: 7f70ca08b8527e9408b8c90a2f855b73, type: 2}
+  - {fileID: 11400000, guid: b84f64266b84758429b38f533110748e, type: 2}

@@ -1,7 +1,7 @@
 {
     "name": "ZooGame.Editor",
     "rootNamespace": "ZooGame.Editor",
-    "references": ["ZooGame.Core","ZooGame.Data","ZooGame.World","ZooGame.Cameras","ZooGame.Input","ZooGame.UI","ZooGame.Gameplay","Unity.InputSystem","Unity.ugui"],
+    "references": ["ZooGame.Core","ZooGame.Data","ZooGame.World","ZooGame.Cameras","ZooGame.Placement","ZooGame.Construction","ZooGame.Input","ZooGame.UI","ZooGame.Gameplay","Unity.InputSystem","Unity.ugui"],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

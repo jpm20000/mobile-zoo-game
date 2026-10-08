@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b39e53837cc01304bb0f241c0d228817, type: 3}
+  m_Name: ConstructionCatalog
+  m_EditorClassIdentifier: ZooGame.Data::ZooGame.Data.ConstructionCatalog
+  paths:
+  - {fileID: 11400000, guid: 5919d88e5d617d54198665d7072405ca, type: 2}
+  fences:
+  - {fileID: 11400000, guid: 69c335154d47e2740bbf5ecbf1b983e3, type: 2}
+  - {fileID: 11400000, guid: 2b2d11b6dc121aa4f86e5c194d61471e, type: 2}
+  - {fileID: 11400000, guid: 420fd1966667d44449443c1725a890ca, type: 2}

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fdffcaa52aa2434ebe4e2fe2662e54c, type: 3}
+  m_Name: Utility Building
+  m_EditorClassIdentifier: ZooGame.Data::ZooGame.Data.PlaceableDefinition
+  id: utility_building
+  displayName: Utility Building
+  category: 1
+  prefab: {fileID: 5637704917764404968, guid: c32e3660329d39a45bfe92cd79e58b43, type: 3}
+  footprintWidth: 2
+  footprintHeight: 3
+  allowRotation: 1
+  icon: {fileID: 0}
+  cost: 0
