@@ -1,0 +1,14 @@
+{
+    "name": "ZooGame.Gameplay",
+    "rootNamespace": "ZooGame.Gameplay",
+    "references": ["ZooGame.Core","ZooGame.Data","ZooGame.World","ZooGame.Platform","ZooGame.Input","ZooGame.UI"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

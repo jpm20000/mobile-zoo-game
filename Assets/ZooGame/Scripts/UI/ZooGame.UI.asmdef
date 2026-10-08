@@ -1,0 +1,14 @@
+{
+    "name": "ZooGame.UI",
+    "rootNamespace": "ZooGame.UI",
+    "references": ["ZooGame.Core","ZooGame.Input","Unity.ugui"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,14 @@
+{
+    "name": "ZooGame.Tests.EditMode",
+    "rootNamespace": "ZooGame.Tests.EditMode",
+    "references": ["ZooGame.Core","ZooGame.Data","ZooGame.Input","ZooGame.UI","UnityEngine.TestRunner","UnityEditor.TestRunner"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": ["nunit.framework.dll"],
+    "autoReferenced": false,
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

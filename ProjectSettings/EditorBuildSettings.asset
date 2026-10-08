@@ -6,7 +6,11 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/ZooGame/Scenes/Bootstrap.unity
+    guid: 4ccdadee477a4214fa1addf39effe09e
+  - enabled: 1
+    path: Assets/ZooGame/Scenes/Zoo.unity
+    guid: f8b4e06e97272e449a59fb2d185fa72c
   m_configObjects:
+    com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
