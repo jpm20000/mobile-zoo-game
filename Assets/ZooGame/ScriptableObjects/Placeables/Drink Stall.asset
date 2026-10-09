@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5fdffcaa52aa2434ebe4e2fe2662e54c, type: 3}
-  m_Name: Food Stall
+  m_Name: Drink Stall
   m_EditorClassIdentifier: ZooGame.Data::ZooGame.Data.PlaceableDefinition
-  id: food_stall
-  displayName: Food Stall
+  id: drink-stall
+  displayName: Drink Stall
   category: 3
-  prefab: {fileID: 4100858756621577848, guid: a18ef9a97c469f947ba74b8f2bd2f879, type: 3}
-  footprintWidth: 2
-  footprintHeight: 2
+  prefab: {fileID: 1180700253510172349, guid: b9c1caa273ed1604b99e506f22fffed4, type: 3}
+  footprintWidth: 1
+  footprintHeight: 1
   allowRotation: 1
   icon: {fileID: 0}
   cost: 0
@@ -25,4 +25,4 @@ MonoBehaviour:
     kind: 0
     amount: 0
   visitorFacility:
-    kind: 2
+    kind: 3

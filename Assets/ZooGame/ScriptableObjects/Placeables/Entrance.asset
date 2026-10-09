@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5fdffcaa52aa2434ebe4e2fe2662e54c, type: 3}
-  m_Name: Food Stall
+  m_Name: Entrance
   m_EditorClassIdentifier: ZooGame.Data::ZooGame.Data.PlaceableDefinition
-  id: food_stall
-  displayName: Food Stall
+  id: zoo-entrance
+  displayName: Entrance
   category: 3
-  prefab: {fileID: 4100858756621577848, guid: a18ef9a97c469f947ba74b8f2bd2f879, type: 3}
+  prefab: {fileID: 2181347415457790164, guid: 0b4b8bb7dab754b41924d410147d0a39, type: 3}
   footprintWidth: 2
   footprintHeight: 2
   allowRotation: 1
@@ -25,4 +25,4 @@ MonoBehaviour:
     kind: 0
     amount: 0
   visitorFacility:
-    kind: 2
+    kind: 1

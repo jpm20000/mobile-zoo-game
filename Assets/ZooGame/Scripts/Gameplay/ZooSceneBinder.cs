@@ -7,6 +7,7 @@ using ZooGame.Data;
 using ZooGame.Input;
 using ZooGame.Placement;
 using ZooGame.UI;
+using ZooGame.Visitors;
 using ZooGame.World;
 
 namespace ZooGame.Gameplay
@@ -46,6 +47,13 @@ namespace ZooGame.Gameplay
         [Header("Animal needs (M5)")]
         [Tooltip("Global needs tuning. Optional: built-in defaults are used when empty.")]
         [SerializeField] AnimalNeedsConfig animalNeedsConfig;
+        [Header("Visitors (M6)")]
+        [Tooltip("Visitor tuning. Optional: built-in defaults are used when empty.")]
+        [SerializeField] VisitorConfig visitorConfig;
+        [SerializeField] VisitorSpawner visitorSpawner;
+        [SerializeField] VisitorSelectionController visitorSelection;
+        [SerializeField] VisitorInfoPanel visitorInfoPanel;
+        [SerializeField] VisitorDebugPanel visitorDebugPanel;
         [Tooltip("Editor convenience: if this scene is entered directly, load the Bootstrap scene first.")]
         [SerializeField] string bootstrapSceneName = "Bootstrap";
 
@@ -77,6 +85,14 @@ namespace ZooGame.Gameplay
 
         /// <summary>The welfare simulation, driven by the GameClock.</summary>
         public AnimalNeedsSystem AnimalNeeds { get; private set; }
+
+        public IVisitorRegistry Visitors { get; private set; }
+        public VisitorSpawner VisitorSpawner => visitorSpawner;
+        public VisitorSelectionController VisitorSelection => visitorSelection;
+        public VisitorNavigationService VisitorNavigation { get; private set; }
+        public VisitorDestinationService VisitorDestinations { get; private set; }
+        public VisitorDecisionService VisitorDecisions { get; private set; }
+        public VisitorSimulationService VisitorSimulation { get; private set; }
 
         void Awake()
         {
@@ -156,9 +172,38 @@ namespace ZooGame.Gameplay
                     buildModeController.RegisterTool(AnimalPlacement);
                     if (animalDebugPanel != null) animalDebugPanel.Bind(AnimalPlacement, buildModeController, animalDefinitions);
                 }
+
+                if (visitorSpawner != null && Placement != null) BindVisitors(game, resolver);
             }
 
             debugHud.Bind(game, game.Config.ShowDebugHud, gridOverlay.Toggle);
+        }
+
+        void BindVisitors(GameManager game, IAnimalDefinitionResolver animalDefinitionResolver)
+        {
+            var config = visitorConfig != null ? visitorConfig : VisitorConfig.CreateDefault();
+            var rng = config.RandomSeed != 0 ? new System.Random(config.RandomSeed) : new System.Random();
+
+            Visitors = new VisitorRegistry();
+            VisitorNavigation = new VisitorNavigationService(Grid, Construction);
+            VisitorDestinations = new VisitorDestinationService(Grid, Construction, Placement, VisitorNavigation,
+                Animals, animalDefinitionResolver);
+            VisitorDecisions = new VisitorDecisionService(config, Visitors, VisitorNavigation, VisitorDestinations, rng);
+            VisitorSimulation = new VisitorSimulationService(config, Visitors, VisitorDecisions);
+            visitorSpawner.Bind(config, Visitors, VisitorDecisions, VisitorDestinations, Grid, rng);
+
+            var driver = visitorSpawner.GetComponent<VisitorSystemDriver>();
+            if (driver == null) driver = visitorSpawner.gameObject.AddComponent<VisitorSystemDriver>();
+            driver.Bind(game.Clock, VisitorDecisions, VisitorSimulation, visitorSpawner);
+
+            var camera = cameraController.GetComponent<Camera>();
+            if (visitorSelection != null)
+            {
+                visitorSelection.Bind(pointerInput, camera, visitorSpawner, DpToPixels(28f));
+                visitorSelection.CanSelect = () => buildModeController == null || buildModeController.Mode == BuildMode.None;
+                if (visitorInfoPanel != null) visitorInfoPanel.Bind(visitorSelection, VisitorSimulation, VisitorDecisions);
+            }
+            if (visitorDebugPanel != null) visitorDebugPanel.Bind(visitorSpawner, VisitorDestinations);
         }
 
         static float DpToPixels(float dp)

@@ -33,6 +33,8 @@ namespace ZooGame.Data
         [SerializeField, Min(0)] int cost;
         [Tooltip("Optional: what this object provides to the enclosure it stands in (food, water, shelter, enrichment).")]
         [SerializeField] HabitatResourceInfo habitatResource;
+        [Tooltip("Optional: what this object is to visitors (entrance, food stall, drink stall, toilet, bench).")]
+        [SerializeField] VisitorFacilityInfo visitorFacility;
 
         public string Id => id;
         public string DisplayName => displayName;
@@ -44,6 +46,10 @@ namespace ZooGame.Data
         public Sprite Icon => icon;
         public int Cost => cost;
         public HabitatResourceInfo HabitatResource => habitatResource;
+        public VisitorFacilityInfo VisitorFacility => visitorFacility;
+
+        /// <summary>Sets the visitor role from code (tests, procedural content).</summary>
+        public void ConfigureVisitorFacility(VisitorFacilityKind kind) => visitorFacility = new VisitorFacilityInfo(kind);
 
         /// <summary>Sets the habitat role from code (tests, procedural content).</summary>
         public void ConfigureHabitatResource(HabitatResourceKind kind, float amount = 1f) =>

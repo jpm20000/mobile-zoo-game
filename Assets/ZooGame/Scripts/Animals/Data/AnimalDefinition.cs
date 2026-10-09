@@ -121,6 +121,13 @@ namespace ZooGame.Animals
             return this;
         }
 
+        /// <summary>Sets the appeal from code (tests, tools).</summary>
+        public AnimalDefinition ConfigureAppeal(float appeal)
+        {
+            baseAppeal = Mathf.Max(0f, appeal);
+            return this;
+        }
+
         /// <summary>Builds an in-memory definition (tests, tools). Authored content is created as assets instead.</summary>
         public static AnimalDefinition Create(string speciesId, string displayName, int minimumEnclosureArea,
             float baseMoveSpeed = 1.5f, GameObject prefab = null)

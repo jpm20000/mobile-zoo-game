@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9a4427fcd048f340a75248e04360ae6, type: 3}
+  m_Name: VisitorConfig
+  m_EditorClassIdentifier: ZooGame.Visitors::ZooGame.Visitors.VisitorConfig
+  tickIntervalSeconds: 2
+  simulatedMinutesPerSecond: 1
+  maxTicksPerAdvance: 8
+  hungerIncreasePerMinute: 1
+  thirstIncreasePerMinute: 1.25
+  toiletIncreasePerMinute: 0.75
+  energyDecreasePerMinute: 0.5
+  hungerUrgentAt: 70
+  thirstUrgentAt: 70
+  toiletUrgentAt: 75
+  energyLowAt: 25
+  foodHungerReduction: 70
+  drinkThirstReduction: 75
+  toiletNeedAfterUse: 0
+  benchEnergyGain: 50
+  facilitySatisfactionBonus: 5
+  restDurationMinutes: 5
+  viewDurationMinutes: 8
+  appealForMaxViewingScore: 100
+  viewingSatisfactionAdjustment: 20
+  recentViewingMultiplier: 0.25
+  hungerMin: 5
+  hungerMax: 20
+  thirstMin: 5
+  thirstMax: 20
+  toiletMin: 0
+  toiletMax: 15
+  energyMin: 80
+  energyMax: 100
+  startingVisitSatisfaction: 60
+  minVisitMinutes: 120
+  maxVisitMinutes: 180
+  unhappyAtOrBelow: 20
+  unhappyDurationMinutes: 2
+  spawnIntervalSeconds: 6
+  maxVisitors: 20
+  randomSeed: 0
+  walkSpeedCellsPerSecond: 1.6
