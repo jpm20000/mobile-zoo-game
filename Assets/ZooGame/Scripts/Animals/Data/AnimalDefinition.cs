@@ -54,6 +54,8 @@ namespace ZooGame.Animals
         [SerializeField, Min(1)] int preferredGroupMin = 1;
         [SerializeField, Min(1)] int preferredGroupMax = 4;
         [SerializeField, Min(0f)] float baseAppeal = 1f;
+        [Tooltip("Money charged when a new animal of this species is placed.")]
+        [SerializeField, Min(0)] int adoptionCost;
 
         [Header("Needs (M5) - per minute of simulated time, on the 0-100 scale")]
         [SerializeField, Min(0f)] float hungerDecayPerMinute = 0.4f;
@@ -85,6 +87,7 @@ namespace ZooGame.Animals
         public int PreferredGroupMin => preferredGroupMin;
         public int PreferredGroupMax => preferredGroupMax;
         public float BaseAppeal => baseAppeal;
+        public int AdoptionCost => adoptionCost;
         public float HungerDecayPerMinute => hungerDecayPerMinute;
         public float ThirstDecayPerMinute => thirstDecayPerMinute;
         public float HungerRecoveryPerMinute => hungerRecoveryPerMinute;
@@ -118,6 +121,13 @@ namespace ZooGame.Animals
             requiredEnrichmentValue = enrichment;
             terrainTolerance = tolerance;
             terrainPreferences = terrain ?? new TerrainPreference[0];
+            return this;
+        }
+
+        /// <summary>Sets the adoption cost from code (tests, tools).</summary>
+        public AnimalDefinition ConfigureAdoptionCost(int cost)
+        {
+            adoptionCost = Mathf.Max(0, cost);
             return this;
         }
 

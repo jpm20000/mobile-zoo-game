@@ -29,6 +29,9 @@ namespace ZooGame.Construction
         public IReadOnlyList<GridCoord> PendingPaths => _paths;
         public IReadOnlyList<EdgeCoord> PendingEdges => _edges;
 
+        /// <summary>Money the marked paths and fences would return if demolished now (floor per segment).</summary>
+        public long RefundQuote() => Ctx.Purchaser.RefundQuote(_paths, _edges);
+
         protected override void OnStrokeAborted(bool rollBack)
         {
             if (!rollBack) return;
@@ -80,9 +83,9 @@ namespace ZooGame.Construction
         public override bool Confirm()
         {
             if (!HasPending) return false;
-            int removed = Ctx.Model.RemovePaths(_paths) + Ctx.Model.RemoveFences(_edges);
+            var commit = Ctx.Purchaser.Demolish(_paths, _edges);
             Clear();
-            return removed > 0;
+            return commit.Units > 0;
         }
 
         public override void Cancel()

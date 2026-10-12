@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ZooGame.Data;
+using ZooGame.Economy;
 using ZooGame.Input;
 using ZooGame.World;
 
@@ -25,6 +26,9 @@ namespace ZooGame.Construction
         public override BuildMode Mode => BuildMode.PathPlacement;
         public override bool HasPending => _pending.Count > 0;
         public IReadOnlyList<GridCoord> Pending => _pending;
+
+        /// <summary>Cell price x pending cells that would actually be built, with affordability.</summary>
+        public PurchaseQuote Quote() => Ctx.Purchaser.QuotePaths(Definition, _pending);
 
         protected override void OnStrokeAborted(bool rollBack)
         {
@@ -65,9 +69,10 @@ namespace ZooGame.Construction
         public override bool Confirm()
         {
             if (_pending.Count == 0) return false;
-            int built = Ctx.Model.BuildPaths(_pending);
+            var commit = Ctx.Purchaser.TryBuildPaths(Definition, _pending);
+            if (commit.Unaffordable) return false; // nothing built or charged; the pending cells stay so the player can trim them
             ClearPending();
-            return built > 0;
+            return commit.Units > 0;
         }
 
         public override void Cancel()

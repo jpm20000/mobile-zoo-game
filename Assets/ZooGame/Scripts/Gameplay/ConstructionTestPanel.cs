@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using ZooGame.Construction;
 using ZooGame.Data;
+using ZooGame.Economy;
 using ZooGame.Input;
 using ZooGame.World;
 
@@ -36,13 +37,16 @@ namespace ZooGame.Gameplay
         readonly StringBuilder _sb = new StringBuilder(128);
         BuildModeController _controller;
         ConstructionModel _model;
+        EconomyService _economy;
         Text _panLabel;
 
-        public void Bind(BuildModeController controller, ConstructionModel model)
+        /// <param name="economy">Optional: shows costs and refunds, and refreshes when Money changes.</param>
+        public void Bind(BuildModeController controller, ConstructionModel model, EconomyService economy = null)
         {
             Unbind();
             _controller = controller;
             _model = model;
+            _economy = economy;
             var catalog = controller.Catalog;
 
             foreach (var def in catalog.Paths)
@@ -65,6 +69,7 @@ namespace ZooGame.Gameplay
             cancelButton.onClick.AddListener(OnCancel);
             _controller.Changed += Refresh;
             _model.FencesChanged += Refresh;
+            if (_economy != null) _economy.TransactionRecorded += OnTransaction;
             Refresh();
         }
 
@@ -89,6 +94,8 @@ namespace ZooGame.Gameplay
             if (_controller == null) return;
             _controller.Changed -= Refresh;
             _model.FencesChanged -= Refresh;
+            if (_economy != null) _economy.TransactionRecorded -= OnTransaction;
+            _economy = null;
             confirmButton.onClick.RemoveListener(OnConfirm);
             cancelButton.onClick.RemoveListener(OnCancel);
             for (int i = 0; i < _buttons.Count; i++)
@@ -100,8 +107,17 @@ namespace ZooGame.Gameplay
 
         void OnDestroy() => Unbind();
 
+        void OnTransaction(TransactionRecord _) => Refresh();
+
         void OnConfirm() => _controller.Confirm();
         void OnCancel() => _controller.Cancel();
+
+        void AppendQuote(PurchaseQuote q)
+        {
+            if (_economy == null || q.TotalCost <= 0) return;
+            _sb.Append("  cost $").Append(q.TotalCost);
+            if (!q.CanAfford) _sb.Append("  (NOT ENOUGH MONEY: need $").Append(q.Shortfall).Append(" more)");
+        }
 
         void Refresh()
         {
@@ -122,14 +138,17 @@ namespace ZooGame.Gameplay
             {
                 case BuildMode.PathPlacement:
                     _sb.Append("Path: drag to paint, then Confirm\n").Append(_controller.Path.Pending.Count).Append(" cells pending");
+                    AppendQuote(_controller.Path.Quote());
                     break;
                 case BuildMode.FencePlacement:
                     _sb.Append(_controller.Fence.Kind == EdgeKind.Gate ? "Gate" : "Fence")
                        .Append(": drag between corners or tap an edge, then Confirm\n").Append(_controller.Fence.Pending.Count).Append(" edges pending");
+                    AppendQuote(_controller.Fence.Quote());
                     break;
                 case BuildMode.Demolition:
                     _sb.Append("Demolish: touch paths or fences, then Confirm\n")
                        .Append(_controller.Demolish.PendingPaths.Count + _controller.Demolish.PendingEdges.Count).Append(" marked");
+                    if (_economy != null) _sb.Append("  refund $").Append(_controller.Demolish.RefundQuote());
                     break;
                 default:
                     _sb.Append("");

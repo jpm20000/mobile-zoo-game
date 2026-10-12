@@ -26,6 +26,11 @@ namespace ZooGame.Placement
         public IReadOnlyList<GridCoord> Cells => _cells;
         /// <summary>Visual representation, if one has been spawned. Owned by the view layer.</summary>
         public GameObject View { get; set; }
+        /// <summary>
+        /// Money actually paid when this object was placed (0 if it was added without a purchase). Kept only so a
+        /// demolition refund is based on what was paid; the static price lives in the definition.
+        /// </summary>
+        public int PurchaseCost { get; internal set; }
 
         internal PlacedObject(int id, PlaceableDefinition definition, GridCoord origin, Rotation90 rotation)
         {

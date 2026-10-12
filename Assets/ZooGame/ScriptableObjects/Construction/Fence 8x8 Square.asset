@@ -18,4 +18,4 @@ MonoBehaviour:
   color: {r: 0.55, g: 0.38, b: 0.22, a: 1}
   height: 0.7
   squareSize: 8
-  cost: 0
+  costPerSegment: 5

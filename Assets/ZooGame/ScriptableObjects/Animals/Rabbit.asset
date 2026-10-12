@@ -23,6 +23,7 @@ MonoBehaviour:
   preferredGroupMin: 2
   preferredGroupMax: 6
   baseAppeal: 1
+  adoptionCost: 300
   hungerDecayPerMinute: 0.4
   thirstDecayPerMinute: 0.6
   hungerRecoveryPerMinute: 6

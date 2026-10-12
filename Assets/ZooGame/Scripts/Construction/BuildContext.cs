@@ -13,6 +13,18 @@ namespace ZooGame.Construction
         public ConstructionModel Model;
         public ConstructionPreview Preview;
         public ConstructionConfig Config;
+        ConstructionPurchaser _purchaser;
+
+        /// <summary>Prices and commits builds and demolition. Free (no charges, no refunds) until the scene supplies a priced one.</summary>
+        public ConstructionPurchaser Purchaser
+        {
+            get
+            {
+                if (_purchaser == null) _purchaser = new ConstructionPurchaser(Model, null, null);
+                return _purchaser;
+            }
+            set => _purchaser = value;
+        }
 
         public bool TryGround(Vector2 screenPosition, out Vector3 point) =>
             GroundProbe.TryGroundPoint(Camera, Grid, screenPosition, out point);

@@ -16,4 +16,4 @@ MonoBehaviour:
   displayName: Basic Path
   color: {r: 0.78, g: 0.68, b: 0.5, a: 1}
   width: 0.7
-  cost: 0
+  costPerCell: 2

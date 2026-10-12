@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ZooGame.Data;
+using ZooGame.Economy;
 using ZooGame.World;
 
 namespace ZooGame.Visitors
@@ -73,6 +75,12 @@ namespace ZooGame.Visitors
 
         public VisitorConfig Config => _config;
 
+        /// <summary>
+        /// Where completed admissions and paid facility uses are reported as Money income. Optional (null = visitors
+        /// pay nothing, as in tests that do not care). Revenue is recorded only after the interaction succeeded.
+        /// </summary>
+        public RevenueService Revenue { get; set; }
+
         public void Dispose()
         {
             _navigation.GraphChanged -= MarkRoutesDirty;
@@ -110,6 +118,7 @@ namespace ZooGame.Visitors
             v.TargetDestinationId = entrance.Id;
             _route.Clear();
             _route.Add(entrance.InteractionPoint);
+            Revenue?.RecordAdmission(entrance.Id);
             AgentOf(v)?.Follow(_route);
             StateChanged?.Invoke(v);
             return true;
@@ -410,9 +419,15 @@ namespace ZooGame.Visitors
             }
             switch (expected)
             {
-                case VisitorDestinationKind.FoodStall: v.Hunger -= _config.FoodHungerReduction; break;
-                case VisitorDestinationKind.DrinkStall: v.Thirst -= _config.DrinkThirstReduction; break;
-                case VisitorDestinationKind.Toilet: v.ToiletNeed = _config.ToiletNeedAfterUse; break;
+                case VisitorDestinationKind.FoodStall:
+                    v.Hunger -= _config.FoodHungerReduction;
+                    Revenue?.RecordFacilityUse(VisitorFacilityKind.FoodStall, dest.Id);
+                    break;
+                case VisitorDestinationKind.DrinkStall:
+                    v.Thirst -= _config.DrinkThirstReduction;
+                    Revenue?.RecordFacilityUse(VisitorFacilityKind.DrinkStall, dest.Id);
+                    break;
+                case VisitorDestinationKind.Toilet: v.ToiletNeed = _config.ToiletNeedAfterUse; break; // free
             }
             v.VisitSatisfaction += _config.FacilitySatisfactionBonus;
             VisitorMath.RecalculateHappiness(v);

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using ZooGame.Data;
+using ZooGame.Economy;
 using ZooGame.Input;
 using ZooGame.World;
 
@@ -64,7 +65,8 @@ namespace ZooGame.Placement
         bool IBuildTool.Confirm() => Confirm();
         void IBuildTool.Cancel() { if (IsBound && _session.IsPlacing) _session.Cancel(); }
 
-        public void Bind(Camera camera, ZooGrid grid, PlacementConfig config, PlaceableCatalog catalog)
+        /// <param name="purchases">Money purchases and refunds. Null makes placement free.</param>
+        public void Bind(Camera camera, ZooGrid grid, PlacementConfig config, PlaceableCatalog catalog, PurchaseService purchases = null)
         {
             Unbind();
             _camera = camera;
@@ -74,7 +76,7 @@ namespace ZooGame.Placement
 
             _map = new PlacementMap(grid);
             _validator = new PlacementValidator(_map);
-            _session = new PlacementSession(_map, _validator);
+            _session = new PlacementSession(_map, _validator, purchases);
 
             _viewRoot = new GameObject("Placed Objects").transform;
             _viewRoot.SetParent(transform, false);

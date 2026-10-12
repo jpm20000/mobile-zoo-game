@@ -1,7 +1,7 @@
 {
     "name": "ZooGame.Placement",
     "rootNamespace": "ZooGame.Placement",
-    "references": ["ZooGame.Core","ZooGame.Data","ZooGame.World","ZooGame.Input","Unity.InputSystem"],
+    "references": ["ZooGame.Core","ZooGame.Data","ZooGame.World","ZooGame.Input","ZooGame.Economy","Unity.InputSystem"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

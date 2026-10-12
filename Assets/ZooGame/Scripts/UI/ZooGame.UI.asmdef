@@ -1,7 +1,7 @@
 {
     "name": "ZooGame.UI",
     "rootNamespace": "ZooGame.UI",
-    "references": ["ZooGame.Core","ZooGame.Input","Unity.ugui"],
+    "references": ["ZooGame.Core","ZooGame.Input","ZooGame.Economy","Unity.ugui"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

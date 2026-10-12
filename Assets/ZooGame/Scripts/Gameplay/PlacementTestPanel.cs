@@ -2,6 +2,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using ZooGame.Data;
+using ZooGame.Economy;
 using ZooGame.Placement;
 
 namespace ZooGame.Gameplay
@@ -26,13 +27,16 @@ namespace ZooGame.Gameplay
         readonly StringBuilder _sb = new StringBuilder(128);
         PlacementController _controller;
         PlacementSession _session;
+        EconomyService _economy;
         GameObject[] _paletteButtons;
 
-        public void Bind(PlacementController controller, PlaceableCatalog catalog)
+        /// <param name="economy">Optional: shows costs and re-checks affordability when Money changes.</param>
+        public void Bind(PlacementController controller, PlaceableCatalog catalog, EconomyService economy = null)
         {
             Unbind();
             _controller = controller;
             _session = controller.Session;
+            _economy = economy;
 
             var defs = catalog.Definitions;
             _paletteButtons = new GameObject[defs.Count];
@@ -41,7 +45,8 @@ namespace ZooGame.Gameplay
                 var def = defs[i];
                 var button = Instantiate(paletteButtonTemplate, paletteRoot);
                 button.name = "Palette " + def.DisplayName;
-                button.GetComponentInChildren<Text>().text = def.DisplayName + "\n" + def.FootprintWidth + "x" + def.FootprintHeight;
+                button.GetComponentInChildren<Text>().text = def.DisplayName + "\n" + def.FootprintWidth + "x" + def.FootprintHeight
+                    + (def.Cost > 0 ? "  $" + def.Cost : string.Empty);
                 button.onClick.AddListener(() => _controller.BeginPlace(def));
                 button.gameObject.SetActive(true);
                 _paletteButtons[i] = button.gameObject;
@@ -53,6 +58,7 @@ namespace ZooGame.Gameplay
             placeButton.onClick.AddListener(OnPlace);
             cancelButton.onClick.AddListener(OnCancel);
             _session.Changed += Refresh;
+            if (_economy != null) _economy.TransactionRecorded += OnTransaction;
             Refresh();
         }
 
@@ -60,6 +66,8 @@ namespace ZooGame.Gameplay
         {
             if (_session == null) return;
             _session.Changed -= Refresh;
+            if (_economy != null) _economy.TransactionRecorded -= OnTransaction;
+            _economy = null;
             moveButton.onClick.RemoveListener(OnMove);
             rotateButton.onClick.RemoveListener(OnRotate);
             deleteButton.onClick.RemoveListener(OnDelete);
@@ -73,6 +81,8 @@ namespace ZooGame.Gameplay
         }
 
         void OnDestroy() => Unbind();
+
+        void OnTransaction(TransactionRecord _) => Refresh();
 
         void OnMove() => _controller.BeginMoveSelected();
         void OnRotate() => _controller.Rotate();
@@ -92,15 +102,18 @@ namespace ZooGame.Gameplay
             placeButton.gameObject.SetActive(previewing);
             cancelButton.gameObject.SetActive(previewing || selected);
             cancelButton.GetComponentInChildren<Text>().text = previewing ? "Cancel" : "Deselect";
-            placeButton.interactable = previewing && _session.Result.IsValid;
+            placeButton.interactable = previewing && _session.Result.IsValid && _session.IsAffordable;
 
             _sb.Clear();
             if (previewing)
             {
                 _sb.Append(_session.Mode == PlacementMode.Moving ? "Moving " : "Placing ").Append(_session.Definition.DisplayName)
                    .Append(' ').Append(_session.Width).Append('x').Append(_session.Height).Append('\n');
-                if (_session.Result.IsValid) _sb.Append("Valid - drag or tap to position, then Place");
-                else _sb.Append("Blocked: ").Append(Describe(_session.Result));
+                if (_session.Cost > 0 && _economy != null)
+                    _sb.Append("Cost $").Append(_session.Cost).Append(" (you have $").Append(_economy.GetBalance(Currency.Money)).Append(")\n");
+                if (!_session.Result.IsValid) _sb.Append("Blocked: ").Append(Describe(_session.Result));
+                else if (!_session.IsAffordable) _sb.Append("Not enough money");
+                else _sb.Append("Valid - drag or tap to position, then Place");
             }
             else if (selected)
             {

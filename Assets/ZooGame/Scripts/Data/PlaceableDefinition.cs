@@ -29,7 +29,7 @@ namespace ZooGame.Data
         [SerializeField, Min(1)] int footprintHeight = 1;
         [SerializeField] bool allowRotation = true;
         [SerializeField] Sprite icon;
-        [Tooltip("Reserved for the economy milestone; nothing deducts it yet.")]
+        [Tooltip("Money charged when a new object is placed (moving and rotating are free).")]
         [SerializeField, Min(0)] int cost;
         [Tooltip("Optional: what this object provides to the enclosure it stands in (food, water, shelter, enrichment).")]
         [SerializeField] HabitatResourceInfo habitatResource;

@@ -1,0 +1,14 @@
+{
+    "name": "ZooGame.Economy",
+    "rootNamespace": "ZooGame.Economy",
+    "references": ["ZooGame.Core","ZooGame.Data"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

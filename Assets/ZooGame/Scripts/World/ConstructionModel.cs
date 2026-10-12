@@ -35,6 +35,18 @@ namespace ZooGame.World
 
         public BuildResult CanBuildPath(GridCoord cell) => PathRules.Validate(cell);
 
+        /// <summary>
+        /// How many of these (distinct) cells <see cref="BuildPaths"/> would build right now: the valid ones without a
+        /// path. Lets callers price a batch before committing it. Builds nothing.
+        /// </summary>
+        public int CountBuildablePaths(IReadOnlyList<GridCoord> cells)
+        {
+            int count = 0;
+            for (int i = 0; i < cells.Count; i++)
+                if (!Grid.HasPath(cells[i]) && PathRules.Validate(cells[i]).IsValid) count++;
+            return count;
+        }
+
         /// <summary>Builds a path on every valid cell that does not already have one. Returns how many cells were built.</summary>
         public int BuildPaths(IReadOnlyList<GridCoord> cells)
         {
@@ -77,6 +89,19 @@ namespace ZooGame.World
                 if (Fences.Set(fe.Edge, fe.Kind)) _changedEdges.Add(fe.Edge);
             }
             return Commit();
+        }
+
+        /// <summary>How many of these (distinct) edges <see cref="BuildFences"/> would change right now. Builds nothing.</summary>
+        public int CountBuildableFences(IReadOnlyList<FenceEdge> edges)
+        {
+            int count = 0;
+            for (int i = 0; i < edges.Count; i++)
+            {
+                var fe = edges[i];
+                if (fe.Kind == EdgeKind.None || Fences.Get(fe.Edge) == fe.Kind) continue;
+                if (FenceRules.Validate(fe.Edge, fe.Kind).IsValid) count++;
+            }
+            return count;
         }
 
         public int RemoveFences(IReadOnlyList<EdgeCoord> edges)

@@ -20,4 +20,9 @@ MonoBehaviour:
   footprintHeight: 1
   allowRotation: 1
   icon: {fileID: 0}
-  cost: 0
+  cost: 40
+  habitatResource:
+    kind: 0
+    amount: 0
+  visitorFacility:
+    kind: 0

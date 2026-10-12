@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using ZooGame.World;
 
 namespace ZooGame.Data
@@ -15,8 +16,9 @@ namespace ZooGame.Data
         [SerializeField, Min(0.05f)] float height = 0.7f;
         [Tooltip("0 = freehand runs. N > 0 = a one-touch N x N cell square outline that follows the finger until confirmed.")]
         [SerializeField, Min(0)] int squareSize;
-        [Tooltip("Reserved for the economy milestone; nothing deducts it yet.")]
-        [SerializeField, Min(0)] int cost;
+        [Tooltip("Money charged per fence or gate segment that is actually built.")]
+        [FormerlySerializedAs("cost")]
+        [SerializeField, Min(0)] int costPerSegment;
 
         public string Id => id;
         public string DisplayName => displayName;
@@ -24,7 +26,16 @@ namespace ZooGame.Data
         public Color Color => color;
         public float Height => height;
         public int SquareSize => squareSize;
-        public int Cost => cost;
+        public int CostPerSegment => costPerSegment;
+
+        /// <summary>Sets kind and cost from code (tests, procedural content).</summary>
+        public FenceDefinition Configure(EdgeKind newKind, int newCostPerSegment)
+        {
+            kind = newKind;
+            costPerSegment = Mathf.Max(0, newCostPerSegment);
+            OnValidate();
+            return this;
+        }
 
         void OnValidate()
         {

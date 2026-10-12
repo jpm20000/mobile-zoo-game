@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ZooGame.Data;
+using ZooGame.Economy;
 using ZooGame.Input;
 using ZooGame.World;
 
@@ -30,6 +31,9 @@ namespace ZooGame.Construction
         public override BuildMode Mode => BuildMode.FencePlacement;
         public override bool HasPending => _pending.Count > 0;
         public IReadOnlyList<FenceEdge> Pending => _pending;
+
+        /// <summary>Segment price x pending edges that would actually be built, with affordability.</summary>
+        public PurchaseQuote Quote() => Ctx.Purchaser.QuoteFences(Definition, _pending);
 
         protected override void BeginStroke(Vector3 ground)
         {
@@ -96,9 +100,10 @@ namespace ZooGame.Construction
         public override bool Confirm()
         {
             if (_pending.Count == 0) return false;
-            int built = Ctx.Model.BuildFences(_pending);
+            var commit = Ctx.Purchaser.TryBuildFences(Definition, _pending);
+            if (commit.Unaffordable) return false; // nothing built or charged; the pending edges stay so the player can trim them
             Clear();
-            return built > 0;
+            return commit.Units > 0;
         }
 
         public override void Cancel()

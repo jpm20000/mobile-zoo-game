@@ -1,5 +1,6 @@
 using System;
 using ZooGame.Data;
+using ZooGame.Economy;
 using ZooGame.World;
 
 namespace ZooGame.Placement
@@ -25,11 +26,14 @@ namespace ZooGame.Placement
     {
         readonly PlacementMap _map;
         readonly PlacementValidator _validator;
+        readonly PurchaseService _purchases;
 
-        public PlacementSession(PlacementMap map, PlacementValidator validator)
+        /// <param name="purchases">Money purchases and refunds. Null makes placement free (tests, tools).</param>
+        public PlacementSession(PlacementMap map, PlacementValidator validator, PurchaseService purchases = null)
         {
             _map = map;
             _validator = validator;
+            _purchases = purchases;
             _map.Removed += OnRemoved;
         }
 
@@ -51,6 +55,12 @@ namespace ZooGame.Placement
 
         /// <summary>Last result of a rejected rotate-in-place, for UI feedback.</summary>
         public PlacementResult LastRejection { get; private set; }
+
+        /// <summary>Money cost of confirming the current preview: the definition's cost when placing a new object, else 0 (moving is free).</summary>
+        public int Cost => Mode == PlacementMode.Placing && Definition != null ? Definition.Cost : 0;
+
+        /// <summary>False only while placing something whose cost exceeds the current Money balance.</summary>
+        public bool IsAffordable => Cost <= 0 || _purchases == null || _purchases.CanAfford(Cost);
 
         /// <summary>Raised whenever anything the UI or views display changed.</summary>
         public event Action Changed;
@@ -122,8 +132,22 @@ namespace ZooGame.Placement
             PlacedObject committed;
             if (Mode == PlacementMode.Placing)
             {
+                // Check first, act, and spend only once the object really exists.
+                int cost = Definition.Cost;
+                if (_purchases != null && !_purchases.Authorize(cost, Definition.Id)) { Changed?.Invoke(); return false; }
                 committed = _map.Add(Definition, Origin, Rotation);
                 if (committed == null) { Revalidate(); Changed?.Invoke(); return false; }
+                if (_purchases != null && cost > 0)
+                {
+                    if (!_purchases.Charge(PurchaseService.CategoryFor(Definition.Category), Definition.Id, cost, 1))
+                    {
+                        _map.Remove(committed); // funds changed between the check and the charge: undo, nothing is kept unpaid
+                        Revalidate();
+                        Changed?.Invoke();
+                        return false;
+                    }
+                    committed.PurchaseCost = cost;
+                }
             }
             else
             {
@@ -170,7 +194,11 @@ namespace ZooGame.Placement
         public bool DeleteSelected()
         {
             if (IsPlacing || Selected == null) return false;
-            return _map.Remove(Selected); // OnRemoved clears the selection and raises Changed
+            var target = Selected;
+            if (!_map.Remove(target)) return false; // OnRemoved clears the selection and raises Changed
+            if (_purchases != null)
+                _purchases.Refund(target.Definition.Id, _purchases.RefundAmount(target.PurchaseCost));
+            return true;
         }
 
         // ---- Internals -------------------------------------------------------------------------------------

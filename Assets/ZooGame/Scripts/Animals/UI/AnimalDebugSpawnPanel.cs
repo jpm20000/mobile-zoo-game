@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using ZooGame.Construction;
+using ZooGame.Economy;
 using ZooGame.Input;
 
 namespace ZooGame.Animals
@@ -33,19 +34,24 @@ namespace ZooGame.Animals
         readonly List<SpeciesButton> _buttons = new List<SpeciesButton>(4);
         AnimalPlacementTool _tool;
         BuildModeController _builder;
+        EconomyService _economy;
 
-        public void Bind(AnimalPlacementTool tool, BuildModeController builder, IReadOnlyList<AnimalDefinition> species)
+        /// <param name="economy">Optional: re-checks affordability when Money changes.</param>
+        public void Bind(AnimalPlacementTool tool, BuildModeController builder, IReadOnlyList<AnimalDefinition> species,
+            EconomyService economy = null)
         {
             Unbind();
             _tool = tool;
             _builder = builder;
+            _economy = economy;
             for (int i = 0; i < species.Count; i++)
             {
                 var def = species[i];
                 if (def == null) continue;
                 var b = Instantiate(buttonTemplate, buttonRoot);
                 b.name = "Spawn " + def.DisplayName;
-                b.GetComponentInChildren<Text>().text = def.DisplayName + " (min " + def.MinimumEnclosureArea + ")";
+                b.GetComponentInChildren<Text>().text = def.DisplayName + " (min " + def.MinimumEnclosureArea + ")"
+                    + (def.AdoptionCost > 0 ? "  $" + def.AdoptionCost : string.Empty);
                 b.onClick.AddListener(() => OnSpecies(def));
                 b.gameObject.SetActive(true);
                 _buttons.Add(new SpeciesButton { Button = b, Definition = def });
@@ -56,6 +62,7 @@ namespace ZooGame.Animals
             cancelButton.onClick.AddListener(OnCancel);
             _tool.Changed += Refresh;
             _builder.Changed += Refresh;
+            if (_economy != null) _economy.TransactionRecorded += OnTransaction;
             Refresh();
         }
 
@@ -64,6 +71,8 @@ namespace ZooGame.Animals
             if (_tool == null) return;
             _tool.Changed -= Refresh;
             _builder.Changed -= Refresh;
+            if (_economy != null) _economy.TransactionRecorded -= OnTransaction;
+            _economy = null;
             placeButton.onClick.RemoveListener(OnPlace);
             cancelButton.onClick.RemoveListener(OnCancel);
             for (int i = 0; i < _buttons.Count; i++) if (_buttons[i].Button != null) Destroy(_buttons[i].Button.gameObject);
@@ -84,6 +93,8 @@ namespace ZooGame.Animals
             if (_tool.Select(def)) _builder.Enter(BuildMode.AnimalPlacement);
         }
 
+        void OnTransaction(TransactionRecord _) => Refresh();
+
         void OnPlace() => _builder.Confirm();
         void OnCancel() => _builder.Cancel();
 
@@ -95,12 +106,15 @@ namespace ZooGame.Animals
 
             placeButton.gameObject.SetActive(placing);
             cancelButton.gameObject.SetActive(placing);
-            placeButton.interactable = placing && _tool.Result.IsValid;
+            placeButton.interactable = placing && _tool.Result.IsValid && _tool.IsAffordable;
 
             if (statusLabel == null) return;
             if (placing)
                 statusLabel.text = "Placing " + _tool.Definition.DisplayName + ": "
-                                   + (_tool.Result.IsValid ? "drag into position, then Place" : _tool.Result.Message);
+                                   + (!_tool.Result.IsValid ? _tool.Result.Message
+                                      : !_tool.IsAffordable ? "not enough money (need $" + _tool.Cost + ")"
+                                      : _tool.Cost > 0 ? "$" + _tool.Cost + " - drag into position, then Place"
+                                      : "drag into position, then Place");
             else statusLabel.text = _tool.LastMessage.Length > 0 ? _tool.LastMessage : "Pick an animal to place in an enclosure";
         }
     }

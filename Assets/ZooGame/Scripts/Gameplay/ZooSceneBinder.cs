@@ -4,6 +4,7 @@ using ZooGame.Animals;
 using ZooGame.Cameras;
 using ZooGame.Construction;
 using ZooGame.Data;
+using ZooGame.Economy;
 using ZooGame.Input;
 using ZooGame.Placement;
 using ZooGame.UI;
@@ -25,6 +26,10 @@ namespace ZooGame.Gameplay
         [SerializeField] TerrainView terrainView;
         [SerializeField] GridDebugOverlay gridOverlay;
         [SerializeField] ZooCameraController cameraController;
+        [Header("Economy (M7)")]
+        [Tooltip("Starting balances, prices and refund rate. Optional: built-in defaults are used when empty.")]
+        [SerializeField] EconomyConfig economyConfig;
+        [SerializeField] EconomyHud economyHud;
         [Header("Placement (M2)")]
         [SerializeField] PlacementController placementController;
         [SerializeField] PlaceableCatalog placementCatalog;
@@ -64,6 +69,15 @@ namespace ZooGame.Gameplay
         public PlacementMap Placement => placementController != null ? placementController.Map : null;
 
         public PlacementController PlacementController => placementController;
+
+        /// <summary>The authoritative currency balances and transaction history (Money and Conservation Tokens).</summary>
+        public EconomyService Economy { get; private set; }
+
+        /// <summary>Money purchase validation and refunds for construction, placement and adoption.</summary>
+        public PurchaseService Purchases { get; private set; }
+
+        /// <summary>Visitor-generated Money income.</summary>
+        public RevenueService Revenue { get; private set; }
 
         /// <summary>Paths, fences, gates and enclosures; null if construction is not set up in the scene.</summary>
         public ConstructionModel Construction { get; private set; }
@@ -109,6 +123,13 @@ namespace ZooGame.Gameplay
 
             pointerInput.SetUiBlocker(new EventSystemPointerBlocker());
 
+            // The economy exists before anything that charges or earns is bound.
+            var economySettings = (economyConfig != null ? economyConfig : EconomyConfig.CreateDefault()).ToSettings();
+            Economy = new EconomyService(economySettings, () => game.Clock.ElapsedTime);
+            Purchases = new PurchaseService(Economy);
+            Revenue = new RevenueService(Economy);
+            if (economyHud != null) economyHud.Bind(Economy);
+
             Grid = new ZooGrid(worldConfig.ToGridSettings());
             terrainView.Bind(Grid, worldConfig.ToTerrainPalette());
 
@@ -121,8 +142,8 @@ namespace ZooGame.Gameplay
 
             if (placementController != null)
             {
-                placementController.Bind(cameraController.GetComponent<Camera>(), Grid, placementConfig, placementCatalog);
-                if (placementPanel != null) placementPanel.Bind(placementController, placementCatalog);
+                placementController.Bind(cameraController.GetComponent<Camera>(), Grid, placementConfig, placementCatalog, Purchases);
+                if (placementPanel != null) placementPanel.Bind(placementController, placementCatalog, Economy);
             }
 
             if (buildModeController != null && placementController != null)
@@ -138,10 +159,11 @@ namespace ZooGame.Gameplay
                     Grid = Grid,
                     Model = Construction,
                     Preview = constructionPreview,
-                    Config = constructionConfig
+                    Config = constructionConfig,
+                    Purchaser = new ConstructionPurchaser(Construction, Purchases, constructionCatalog)
                 };
                 buildModeController.Bind(pointerInput, context, placementController, constructionCatalog);
-                if (constructionPanel != null) constructionPanel.Bind(buildModeController, Construction);
+                if (constructionPanel != null) constructionPanel.Bind(buildModeController, Construction, Economy);
             }
 
             if (animalSpawner != null && Construction != null)
@@ -168,9 +190,9 @@ namespace ZooGame.Gameplay
                 }
                 if (buildModeController != null)
                 {
-                    AnimalPlacement = new AnimalPlacementTool(cameraController.GetComponent<Camera>(), Grid, animalSpawner);
+                    AnimalPlacement = new AnimalPlacementTool(cameraController.GetComponent<Camera>(), Grid, animalSpawner, Purchases);
                     buildModeController.RegisterTool(AnimalPlacement);
-                    if (animalDebugPanel != null) animalDebugPanel.Bind(AnimalPlacement, buildModeController, animalDefinitions);
+                    if (animalDebugPanel != null) animalDebugPanel.Bind(AnimalPlacement, buildModeController, animalDefinitions, Economy);
                 }
 
                 if (visitorSpawner != null && Placement != null) BindVisitors(game, resolver);
@@ -189,6 +211,7 @@ namespace ZooGame.Gameplay
             VisitorDestinations = new VisitorDestinationService(Grid, Construction, Placement, VisitorNavigation,
                 Animals, animalDefinitionResolver);
             VisitorDecisions = new VisitorDecisionService(config, Visitors, VisitorNavigation, VisitorDestinations, rng);
+            VisitorDecisions.Revenue = Revenue;
             VisitorSimulation = new VisitorSimulationService(config, Visitors, VisitorDecisions);
             visitorSpawner.Bind(config, Visitors, VisitorDecisions, VisitorDestinations, Grid, rng);
 

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using ZooGame.Economy;
 using ZooGame.Input;
 using ZooGame.World;
 
@@ -24,6 +25,7 @@ namespace ZooGame.Animals
         readonly ZooGrid _grid;
         readonly AnimalSpawner _spawner;
         readonly AnimalPlacementValidator _validator;
+        readonly PurchaseService _purchases;
         readonly MaterialPropertyBlock _block = new MaterialPropertyBlock();
 
         AnimalDefinition _definition;
@@ -34,8 +36,10 @@ namespace ZooGame.Animals
         int _dragPointer = NoPointer;
         Vector3 _grabOffset;
 
-        public AnimalPlacementTool(Camera camera, ZooGrid grid, AnimalSpawner spawner)
+        /// <param name="purchases">Money purchases. Null makes adoption free (tests, tools).</param>
+        public AnimalPlacementTool(Camera camera, ZooGrid grid, AnimalSpawner spawner, PurchaseService purchases = null)
         {
+            _purchases = purchases;
             _camera = camera;
             _grid = grid;
             _spawner = spawner;
@@ -46,6 +50,10 @@ namespace ZooGame.Animals
         public AnimalDefinition Definition => _definition;
         public Vector3 Position => _position;
         public AnimalPlacementResult Result { get; private set; }
+        /// <summary>Adoption cost of the species being placed (0 when nothing is selected).</summary>
+        public int Cost => _definition != null ? _definition.AdoptionCost : 0;
+        /// <summary>False only while the species being placed costs more than the current Money balance.</summary>
+        public bool IsAffordable => Cost <= 0 || _purchases == null || _purchases.CanAfford(Cost);
         /// <summary>The enclosure under the ghost (null when it is over open ground).</summary>
         public string EnclosureId => _enclosureId;
         public GameObject GhostObject => _ghost;
@@ -98,6 +106,13 @@ namespace ZooGame.Animals
                 Changed?.Invoke();
                 return false;
             }
+            int cost = _definition.AdoptionCost;
+            if (_purchases != null && !_purchases.Authorize(cost, _definition.SpeciesId))
+            {
+                LastMessage = "Not enough money (need " + cost + ")";
+                Changed?.Invoke();
+                return false;
+            }
             var spawned = _spawner.SpawnAt(_definition.SpeciesId, _enclosureId, _position);
             if (!spawned.Success)
             {
@@ -105,7 +120,14 @@ namespace ZooGame.Animals
                 Changed?.Invoke();
                 return false;
             }
-            string message = "Placed " + spawned.Animal.DisplayName;
+            if (_purchases != null && !_purchases.Charge(TransactionCategory.AnimalAdoption, _definition.SpeciesId, cost, 1))
+            {
+                _spawner.Delete(spawned.Animal.AnimalId); // funds changed between the check and the charge: undo
+                LastMessage = "Not enough money (need " + cost + ")";
+                Changed?.Invoke();
+                return false;
+            }
+            string message = "Adopted " + spawned.Animal.DisplayName + (cost > 0 ? " for " + cost : string.Empty);
             Clear();
             LastMessage = message;
             Changed?.Invoke();
