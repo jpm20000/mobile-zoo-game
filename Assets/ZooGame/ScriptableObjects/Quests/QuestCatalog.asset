@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 103bb9a319f111e409e16397da7e5b0e, type: 3}
+  m_Name: QuestCatalog
+  m_EditorClassIdentifier: ZooGame.Quests::ZooGame.Quests.QuestCatalog
+  quests:
+  - {fileID: 11400000, guid: 21d6b29c28787eb44b2e1286aed6b723, type: 2}
+  - {fileID: 11400000, guid: 1f49525307d93764f9748dce54882225, type: 2}
+  - {fileID: 11400000, guid: 9edd901ce4874974b94eeab315811f60, type: 2}
+  - {fileID: 11400000, guid: ae1bb31a31eba374f8edf3b38328ce17, type: 2}
+  - {fileID: 11400000, guid: 6ad14d0ae0bbded49b7fa536f72ab7fd, type: 2}
+  - {fileID: 11400000, guid: 0fd051c6bd4414c4abd97f00471d83f5, type: 2}
+  - {fileID: 11400000, guid: c5a4d5340a09eef48a26d10e059fd25d, type: 2}

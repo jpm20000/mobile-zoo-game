@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6be94289d8934c54cb5e1c7c0cbaa3fe, type: 3}
+  m_Name: starter-create-enclosure
+  m_EditorClassIdentifier: ZooGame.Quests::ZooGame.Quests.QuestDefinition
+  questId: starter-create-enclosure
+  title: Build a home
+  description: Animals need a fenced enclosure.
+  objectives:
+  - objectiveId: create-enclosure
+    type: 3
+    targetId: 
+    matchCategory: 0
+    category: 0
+    targetValue: 1
+    displayText: Create an enclosure
+  rewards:
+  - type: 0
+    amount: 750
+  - type: 2
+    amount: 50
+  prerequisiteQuestIds:
+  - starter-build-path
+  minimumLevel: 0
+  minimumStars: 0

@@ -20,6 +20,7 @@ namespace ZooGame.World
         readonly TerrainType[] _terrain;
         readonly ushort[] _enclosure;
         int _unlockedCount;
+        int _pathCount;
 
         public int Width { get; }
         public int Depth { get; }
@@ -28,6 +29,9 @@ namespace ZooGame.World
         public Vector3 Origin { get; }
         public int CellCount => _flags.Length;
         public int UnlockedCount => _unlockedCount;
+
+        /// <summary>Number of cells that currently have a path. Maintained incrementally, so reading it is O(1).</summary>
+        public int PathCount => _pathCount;
 
         /// <summary>Minimum world corner of the whole grid (alias of <see cref="Origin"/>).</summary>
         public Vector3 WorldMin => Origin;
@@ -178,6 +182,7 @@ namespace ZooGame.World
             if (!IsInsideGrid(c)) return false;
             if (SetFlag(Index(c), CellFlags.HasPath, hasPath, out bool changed) && changed)
             {
+                _pathCount += hasPath ? 1 : -1;
                 Changed?.Invoke();
                 PathsChanged?.Invoke();
             }

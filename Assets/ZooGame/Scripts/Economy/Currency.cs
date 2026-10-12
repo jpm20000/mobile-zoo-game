@@ -34,6 +34,8 @@ namespace ZooGame.Economy
         DemolitionRefund,
         /// <summary>Reserved: awarded by the future animal release system (Conservation Tokens). Nothing triggers it yet.</summary>
         ConservationReward,
+        /// <summary>A claimed quest reward (M10), Money or Conservation Tokens. Not counted as earned revenue.</summary>
+        QuestReward,
         /// <summary>Development/testing grants only.</summary>
         DebugGrant,
 

@@ -1,0 +1,14 @@
+{
+    "name": "ZooGame.Quests",
+    "rootNamespace": "ZooGame.Quests",
+    "references": ["ZooGame.Core","ZooGame.World","ZooGame.Data","ZooGame.Placement","ZooGame.Animals","ZooGame.Visitors","ZooGame.Staff","ZooGame.Economy","ZooGame.Progression","Unity.ugui"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

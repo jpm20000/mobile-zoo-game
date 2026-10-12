@@ -63,6 +63,9 @@ namespace ZooGame.Animals
         /// <summary>Raised when the species, the ghost position/validity or the last message changes.</summary>
         public event Action Changed;
 
+        /// <summary>Raised with the species id after an adoption fully succeeded (animal spawned and paid for).</summary>
+        public event Action<string> Adopted;
+
         // ---- IBuildTool ------------------------------------------------------------------------------------
 
         public BuildMode Mode => BuildMode.AnimalPlacement;
@@ -127,6 +130,7 @@ namespace ZooGame.Animals
                 Changed?.Invoke();
                 return false;
             }
+            Adopted?.Invoke(_definition.SpeciesId);
             string message = "Adopted " + spawned.Animal.DisplayName + (cost > 0 ? " for " + cost : string.Empty);
             Clear();
             LastMessage = message;

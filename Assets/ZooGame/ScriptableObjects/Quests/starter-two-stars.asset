@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6be94289d8934c54cb5e1c7c0cbaa3fe, type: 3}
+  m_Name: starter-two-stars
+  m_EditorClassIdentifier: ZooGame.Quests::ZooGame.Quests.QuestDefinition
+  questId: starter-two-stars
+  title: Rising star
+  description: Improve the zoo until it earns two stars.
+  objectives:
+  - objectiveId: two-stars
+    type: 11
+    targetId: 
+    matchCategory: 0
+    category: 0
+    targetValue: 2
+    displayText: Reach a 2-star zoo rating
+  rewards:
+  - type: 0
+    amount: 2500
+  - type: 1
+    amount: 5
+  - type: 2
+    amount: 200
+  prerequisiteQuestIds:
+  - starter-hire-keeper
+  minimumLevel: 0
+  minimumStars: 0

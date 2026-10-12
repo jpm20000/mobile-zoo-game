@@ -8,6 +8,7 @@ using ZooGame.Economy;
 using ZooGame.Input;
 using ZooGame.Placement;
 using ZooGame.Progression;
+using ZooGame.Quests;
 using ZooGame.Staff;
 using ZooGame.UI;
 using ZooGame.Visitors;
@@ -70,6 +71,11 @@ namespace ZooGame.Gameplay
         [Tooltip("Rating targets, weights and star thresholds. Optional: built-in defaults are used when empty.")]
         [SerializeField] ZooRatingConfig zooRatingConfig;
         [SerializeField] ZooRatingHud zooRatingHud;
+        [Header("Quests (M10)")]
+        [Tooltip("The quests in this game. Optional: without a catalogue there are no quests.")]
+        [SerializeField] QuestCatalog questCatalog;
+        [SerializeField] QuestPanel questPanel;
+        [SerializeField] QuestTrackerHud questTracker;
         [Tooltip("Editor convenience: if this scene is entered directly, load the Bootstrap scene first.")]
         [SerializeField] string bootstrapSceneName = "Bootstrap";
 
@@ -131,6 +137,14 @@ namespace ZooGame.Gameplay
         /// <summary>The zoo rating and star level (null if visitors/animals are not set up in the scene).</summary>
         public ZooRatingService Rating { get; private set; }
 
+        /// <summary>Zoo XP and level. Always present once the scene is bound.</summary>
+        public ProgressionService Progression { get; private set; }
+
+        /// <summary>Quest lifecycle and progress; null when no quest catalogue is assigned.</summary>
+        public QuestService Quests { get; private set; }
+
+        QuestEventBridge _questBridge;
+
         void Awake()
         {
             var game = GameManager.Instance;
@@ -151,6 +165,7 @@ namespace ZooGame.Gameplay
             Economy = new EconomyService(economySettings, () => game.Clock.ElapsedTime);
             Purchases = new PurchaseService(Economy);
             Revenue = new RevenueService(Economy);
+            Progression = new ProgressionService();
             if (economyHud != null) economyHud.Bind(Economy);
 
             Grid = new ZooGrid(worldConfig.ToGridSettings());
@@ -223,7 +238,42 @@ namespace ZooGame.Gameplay
                 if (VisitorDestinations != null) BindRating(game);
             }
 
+            if (questCatalog != null) BindQuests();
+
             debugHud.Bind(game, game.Config.ShowDebugHud, gridOverlay.Toggle);
+        }
+
+        void OnDestroy()
+        {
+            if (_questBridge != null) _questBridge.Dispose();
+        }
+
+        // Quests listen to the existing services' events through the bridge; nothing here runs per frame.
+        void BindQuests()
+        {
+            var library = questCatalog.BuildLibrary();
+            foreach (var problem in library.Problems) Debug.LogWarning("Quest catalogue: " + problem);
+
+            var world = new QuestWorldQuery(Placement, Grid, Construction, Animals, Visitors, Staff, Rating, Progression);
+            var rewards = new QuestRewardService(Economy, Progression);
+            Quests = new QuestService(library, world, rewards);
+
+            _questBridge = new QuestEventBridge(Quests, new QuestEventSources
+            {
+                Placement = Placement,
+                Grid = Grid,
+                Construction = Construction,
+                Animals = Animals,
+                AnimalPlacement = AnimalPlacement,
+                Visitors = Visitors,
+                Staff = Staff,
+                Rating = Rating,
+                Progression = Progression,
+                Economy = Economy
+            });
+
+            if (questPanel != null) questPanel.Bind(Quests);
+            if (questTracker != null) questTracker.Bind(Quests);
         }
 
         void BindVisitors(GameManager game, IAnimalDefinitionResolver animalDefinitionResolver)
