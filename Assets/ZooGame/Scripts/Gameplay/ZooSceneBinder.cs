@@ -7,6 +7,7 @@ using ZooGame.Data;
 using ZooGame.Economy;
 using ZooGame.Input;
 using ZooGame.Placement;
+using ZooGame.Progression;
 using ZooGame.Staff;
 using ZooGame.UI;
 using ZooGame.Visitors;
@@ -65,6 +66,10 @@ namespace ZooGame.Gameplay
         [SerializeField] StaffConfig staffConfig;
         [SerializeField] StaffSpawner staffSpawner;
         [SerializeField] StaffPanel staffPanel;
+        [Header("Zoo rating (M9)")]
+        [Tooltip("Rating targets, weights and star thresholds. Optional: built-in defaults are used when empty.")]
+        [SerializeField] ZooRatingConfig zooRatingConfig;
+        [SerializeField] ZooRatingHud zooRatingHud;
         [Tooltip("Editor convenience: if this scene is entered directly, load the Bootstrap scene first.")]
         [SerializeField] string bootstrapSceneName = "Bootstrap";
 
@@ -122,6 +127,9 @@ namespace ZooGame.Gameplay
         public StaffTaskPool StaffTasks { get; private set; }
         public StaffHiringService StaffHiring { get; private set; }
         public StaffWorkService StaffWork { get; private set; }
+
+        /// <summary>The zoo rating and star level (null if visitors/animals are not set up in the scene).</summary>
+        public ZooRatingService Rating { get; private set; }
 
         void Awake()
         {
@@ -212,6 +220,7 @@ namespace ZooGame.Gameplay
 
                 if (visitorSpawner != null && Placement != null) BindVisitors(game, resolver);
                 if (staffSpawner != null && VisitorDestinations != null) BindStaff(game);
+                if (VisitorDestinations != null) BindRating(game);
             }
 
             debugHud.Bind(game, game.Config.ShowDebugHud, gridOverlay.Toggle);
@@ -265,6 +274,20 @@ namespace ZooGame.Gameplay
             if (staffPanel != null)
                 staffPanel.Bind(StaffHiring, Staff, StaffFacilities, StaffAssignments, StaffTasks, StaffWork,
                     placementController != null ? placementController.Session : null, VisitorDestinations, Animals, config);
+        }
+
+        void BindRating(GameManager game)
+        {
+            var settings = (zooRatingConfig != null ? zooRatingConfig : ZooRatingConfig.CreateDefault()).ToSettings();
+            Rating = new ZooRatingService(settings, Animals, Visitors, Placement, VisitorDestinations);
+            // Leaving visitors feed the rolling happiness average.
+            VisitorDecisions.Left += Rating.RecordVisitorDeparture;
+
+            var driver = gameObject.GetComponent<ZooRatingDriver>();
+            if (driver == null) driver = gameObject.AddComponent<ZooRatingDriver>();
+            driver.Bind(game.Clock, Rating);
+
+            if (zooRatingHud != null) zooRatingHud.Bind(Rating);
         }
 
         static float DpToPixels(float dp)

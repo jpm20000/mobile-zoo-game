@@ -1,0 +1,14 @@
+{
+    "name": "ZooGame.Progression",
+    "rootNamespace": "ZooGame.Progression",
+    "references": ["ZooGame.Core","ZooGame.World","ZooGame.Data","ZooGame.Placement","ZooGame.Animals","ZooGame.Visitors","Unity.ugui"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

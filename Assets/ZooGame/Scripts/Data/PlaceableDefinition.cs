@@ -35,6 +35,8 @@ namespace ZooGame.Data
         [SerializeField] HabitatResourceInfo habitatResource;
         [Tooltip("Optional: what this object is to visitors (entrance, food stall, drink stall, toilet, bench).")]
         [SerializeField] VisitorFacilityInfo visitorFacility;
+        [Tooltip("Contribution to the Zoo Beauty rating component (M9). 0 = none; negative values are treated as 0.")]
+        [SerializeField, Min(0f)] float beautyValue;
 
         public string Id => id;
         public string DisplayName => displayName;
@@ -47,6 +49,11 @@ namespace ZooGame.Data
         public int Cost => cost;
         public HabitatResourceInfo HabitatResource => habitatResource;
         public VisitorFacilityInfo VisitorFacility => visitorFacility;
+        /// <summary>Zoo Beauty contribution while placed. Never negative.</summary>
+        public float BeautyValue => beautyValue;
+
+        /// <summary>Sets the beauty value from code (tests, procedural content). Negative and NaN become 0.</summary>
+        public void ConfigureBeauty(float value) => beautyValue = float.IsNaN(value) ? 0f : Mathf.Max(0f, value);
 
         /// <summary>Sets the visitor role from code (tests, procedural content).</summary>
         public void ConfigureVisitorFacility(VisitorFacilityKind kind) => visitorFacility = new VisitorFacilityInfo(kind);
@@ -60,6 +67,7 @@ namespace ZooGame.Data
             footprintWidth = Mathf.Max(1, footprintWidth);
             footprintHeight = Mathf.Max(1, footprintHeight);
             cost = Mathf.Max(0, cost);
+            beautyValue = Mathf.Max(0f, beautyValue);
         }
 
         /// <summary>Fills a definition from code (tests, procedural content). Values are clamped to valid ranges.</summary>

@@ -26,3 +26,4 @@ MonoBehaviour:
     amount: 2
   visitorFacility:
     kind: 0
+  beautyValue: 2
