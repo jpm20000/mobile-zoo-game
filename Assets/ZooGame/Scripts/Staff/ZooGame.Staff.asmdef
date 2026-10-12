@@ -1,0 +1,14 @@
+{
+    "name": "ZooGame.Staff",
+    "rootNamespace": "ZooGame.Staff",
+    "references": ["ZooGame.Core","ZooGame.World","ZooGame.Input","ZooGame.Data","ZooGame.Placement","ZooGame.Animals","ZooGame.Economy","ZooGame.Visitors","Unity.ugui"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

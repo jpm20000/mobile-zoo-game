@@ -7,6 +7,7 @@ using ZooGame.Data;
 using ZooGame.Economy;
 using ZooGame.Input;
 using ZooGame.Placement;
+using ZooGame.Staff;
 using ZooGame.UI;
 using ZooGame.Visitors;
 using ZooGame.World;
@@ -59,6 +60,11 @@ namespace ZooGame.Gameplay
         [SerializeField] VisitorSelectionController visitorSelection;
         [SerializeField] VisitorInfoPanel visitorInfoPanel;
         [SerializeField] VisitorDebugPanel visitorDebugPanel;
+        [Header("Staff (M8)")]
+        [Tooltip("Hire costs, staff cap and walking speed. Optional: built-in defaults are used when empty.")]
+        [SerializeField] StaffConfig staffConfig;
+        [SerializeField] StaffSpawner staffSpawner;
+        [SerializeField] StaffPanel staffPanel;
         [Tooltip("Editor convenience: if this scene is entered directly, load the Bootstrap scene first.")]
         [SerializeField] string bootstrapSceneName = "Bootstrap";
 
@@ -107,6 +113,15 @@ namespace ZooGame.Gameplay
         public VisitorDestinationService VisitorDestinations { get; private set; }
         public VisitorDecisionService VisitorDecisions { get; private set; }
         public VisitorSimulationService VisitorSimulation { get; private set; }
+
+        public IStaffRegistry Staff { get; private set; }
+        public StaffSpawner StaffSpawner => staffSpawner;
+        public StaffFacilityRegistry StaffFacilities { get; private set; }
+        /// <summary>The only way to assign staff to facilities (UI must not write the ids itself).</summary>
+        public StaffAssignmentService StaffAssignments { get; private set; }
+        public StaffTaskPool StaffTasks { get; private set; }
+        public StaffHiringService StaffHiring { get; private set; }
+        public StaffWorkService StaffWork { get; private set; }
 
         void Awake()
         {
@@ -196,6 +211,7 @@ namespace ZooGame.Gameplay
                 }
 
                 if (visitorSpawner != null && Placement != null) BindVisitors(game, resolver);
+                if (staffSpawner != null && VisitorDestinations != null) BindStaff(game);
             }
 
             debugHud.Bind(game, game.Config.ShowDebugHud, gridOverlay.Toggle);
@@ -227,6 +243,28 @@ namespace ZooGame.Gameplay
                 if (visitorInfoPanel != null) visitorInfoPanel.Bind(visitorSelection, VisitorSimulation, VisitorDecisions);
             }
             if (visitorDebugPanel != null) visitorDebugPanel.Bind(visitorSpawner, VisitorDestinations);
+        }
+
+        void BindStaff(GameManager game)
+        {
+            var config = staffConfig != null ? staffConfig : StaffConfig.CreateDefault();
+
+            Staff = new StaffRegistry();
+            StaffFacilities = new StaffFacilityRegistry(Placement);
+            StaffAssignments = new StaffAssignmentService(Staff, StaffFacilities);
+            StaffTasks = new StaffTaskPool(Staff);
+            StaffWork = new StaffWorkService(Staff, StaffFacilities, StaffAssignments, StaffTasks, VisitorNavigation,
+                VisitorDestinations, Animals);
+            StaffHiring = new StaffHiringService(config, Staff, VisitorDestinations, Purchases);
+
+            staffSpawner.Bind(Staff, StaffWork, Grid, config.WalkSpeedCellsPerSecond);
+            var driver = staffSpawner.GetComponent<StaffSystemDriver>();
+            if (driver == null) driver = staffSpawner.gameObject.AddComponent<StaffSystemDriver>();
+            driver.Bind(game.Clock, StaffWork, staffSpawner);
+
+            if (staffPanel != null)
+                staffPanel.Bind(StaffHiring, Staff, StaffFacilities, StaffAssignments, StaffTasks, StaffWork,
+                    placementController != null ? placementController.Session : null, VisitorDestinations, Animals, config);
         }
 
         static float DpToPixels(float dp)

@@ -98,6 +98,14 @@ namespace ZooGame.Visitors
         /// <summary>Raised when the destination set may have changed (including enable/disable).</summary>
         public event Action Changed;
 
+        /// <summary>
+        /// Optional extra gate on usability, evaluated for every destination whenever the set is built or
+        /// <see cref="RefreshOperational"/> runs. A destination is <see cref="VisitorDestination.Enabled"/> only while it
+        /// has not been disabled with <see cref="SetEnabled"/> and this returns true (or is null). Staffing uses it to
+        /// keep a stall closed until its vendor is working.
+        /// </summary>
+        public Func<VisitorDestination, bool> Operational { get; set; }
+
         /// <summary>How many times the destination set was rebuilt (diagnostics and tests).</summary>
         public int RebuildCount { get; private set; }
 
@@ -142,12 +150,37 @@ namespace ZooGame.Visitors
         public bool SetEnabled(string destinationId, bool enabled)
         {
             if (!TryGet(destinationId, out var d)) return false;
-            if (d.Enabled == enabled) return true;
+            bool wasDisabled = _disabled.Contains(destinationId);
+            if (wasDisabled == !enabled) return true;
             if (enabled) _disabled.Remove(destinationId); else _disabled.Add(destinationId);
-            d.Enabled = enabled;
+            d.Enabled = IsUsable(d);
             Changed?.Invoke();
             return true;
         }
+
+        /// <summary>
+        /// Re-evaluates <see cref="Operational"/> for every destination. Raises <see cref="Changed"/> only when at least
+        /// one destination's availability actually changed.
+        /// </summary>
+        public void RefreshOperational()
+        {
+            if (_dirty) return; // the pending rebuild evaluates it
+            bool changed = false;
+            for (int i = 0; i < _all.Count; i++)
+            {
+                var d = _all[i];
+                bool usable = IsUsable(d);
+                if (d.Enabled == usable) continue;
+                d.Enabled = usable;
+                changed = true;
+            }
+            if (changed) Changed?.Invoke();
+        }
+
+        bool IsUsable(VisitorDestination d) => !_disabled.Contains(d.Id) && (Operational == null || Operational(d));
+
+        /// <summary>The destination id of a placed facility. Stable for as long as the placed object exists, also across moves.</summary>
+        public static string FacilityIdFor(int placedObjectId) => "facility-" + placedObjectId;
 
         // ---- Reachability ----------------------------------------------------------------------------------
 
@@ -255,9 +288,11 @@ namespace ZooGame.Visitors
             {
                 var kind = obj.Definition.VisitorFacility.Kind;
                 if (kind == VisitorFacilityKind.None) continue;
-                string id = "facility-" + obj.Id;
+                string id = FacilityIdFor(obj.Id);
                 CollectInteractionCells(obj, _scratchCells);
-                Add(new VisitorDestination(id, Map(kind), _scratchCells.ToArray(), 0, obj.Id, Centre(obj), !_disabled.Contains(id)));
+                var destination = new VisitorDestination(id, Map(kind), _scratchCells.ToArray(), 0, obj.Id, Centre(obj), true);
+                destination.Enabled = IsUsable(destination);
+                Add(destination);
             }
         }
 

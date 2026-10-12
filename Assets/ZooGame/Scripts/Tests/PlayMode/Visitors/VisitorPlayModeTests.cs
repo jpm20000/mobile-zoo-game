@@ -12,6 +12,7 @@ using ZooGame.Core;
 using ZooGame.Data;
 using ZooGame.Gameplay;
 using ZooGame.Placement;
+using ZooGame.Staff;
 using ZooGame.Visitors;
 using ZooGame.World;
 
@@ -122,6 +123,17 @@ namespace ZooGame.Tests.PlayMode.Visitors
                 var r = _binder.AnimalSpawner.SpawnNew("rabbit", AnimalEnclosureService.ToId(_penId));
                 Assert.IsTrue(r.Success, r.Message);
             }
+        }
+
+        /// <summary>Stalls only serve visitors while their vendor works there (M8): hire one, assign it and wait until it is at the stall.</summary>
+        IEnumerator OpenStall(PlacedObject stall)
+        {
+            Assert.AreEqual(StaffHireResult.Success, _binder.StaffHiring.Hire(StaffRole.Vendor, out var vendor));
+            Assert.AreEqual(StaffAssignmentResult.Success,
+                _binder.StaffAssignments.Assign(vendor.StaffId, VisitorDestinationService.FacilityIdFor(stall.Id)));
+            _clock.SetSpeed(SimulationSpeed.X3);
+            yield return WaitUntil(() => vendor.State == StaffState.Working, 20f);
+            Assert.AreEqual(StaffState.Working, vendor.State, "vendor reached the stall");
         }
 
         VisitorController SpawnVisitor()
@@ -242,6 +254,7 @@ namespace ZooGame.Tests.PlayMode.Visitors
         public IEnumerator HungryVisitors_UseAFoodStall()
         {
             BuildZoo();
+            yield return OpenStall(_food);
             var c = SpawnVisitor();
             yield return null;
             c.Instance.Hunger = 92f;

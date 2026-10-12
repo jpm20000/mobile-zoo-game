@@ -46,6 +46,8 @@ namespace ZooGame.Economy
         AnimalAdoption,
         /// <summary>Reserved: future Conservation Token spending (unlocks). Nothing triggers it yet.</summary>
         ConservationUnlock,
+        /// <summary>Hiring a staff member (M8).</summary>
+        StaffHiring,
         /// <summary>Development/testing charges only.</summary>
         DebugCharge
     }
